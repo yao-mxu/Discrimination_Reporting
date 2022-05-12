@@ -14,7 +14,8 @@ library(ggplot2);library(reshape2);library(data.table);library(openxlsx);library
 library(maptools);library(tigris);library(leaflet);library(sf);library(maps);library(janitor);library(censusxy);library(dplyr);library(rgeos)
 library(geosphere); require(dplyr) 
 
-load("/Users/yaoxu/DropboxProfMakovi/Dropbox/Discrimination Reporting Yao/Data/reporting_test_20220512.RData")
+githubURL<-"https://github.com/yx1441/Discrimination_Reporting/blob/85ad65018eba9215b59772ab05fbef1388c062ca/reporting_test_20220512.RData"
+load(url(githubURL))
 
 year_full<-c(2014,2015,2016,2017,2018,2019)
 year_4<-c(2015,2016,2017,2018)
@@ -80,41 +81,3 @@ server <- function(input, output) {
 # Run the application 
 shinyApp(ui = ui, server = server)
 
-
-library(shiny)
-
-ui <- fluidPage(
-    selectInput("download", "Select Data to download", choices = c("euro", "mtcars", "iris")),
-    downloadButton("downloadData")
-)
-
-server <- function(input, output, session) {
-    
-    dataDownload <- reactive({
-        switch(input$download,
-               "euro" = euro,
-               "mtcars" = mtcars,
-               "iris" = iris)
-    })
-    
-    output$downloadData <- downloadHandler(
-        filename = function() {
-            paste(input$download, ".csv", sep = "")
-        },
-        content = function(file) {
-            write.csv(dataDownload(), file, row.names = FALSE)
-        }
-    )
-    
-}
-
-shinyApp(ui, server)
-
-
-# sidebarLayout(
-#    sidebarPanel(
-#        sliderInput("bins",
-#                    "Year:",
-#                    min = 2014,
-#                    max = 2019,
-#                    value = 6)),
