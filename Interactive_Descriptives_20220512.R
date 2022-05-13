@@ -5,7 +5,6 @@
 options(download.file.method = "wininet")
 shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
 
-
 devtools::install_github("yx1441/Discrimination_Reporting@master")
 
 
