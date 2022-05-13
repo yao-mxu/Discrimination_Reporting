@@ -36,7 +36,7 @@ time_series<-function(ba_category, year){
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"))# +theme(axis.text.x = element_text(angle = 90,size=6, vjust = 0.5, hjust=1))
 }
-time_series("ba_race",year_full)
+# time_series("ba_race",year_full)
 # Application title
 # titlePanel(),
 # Sidebar with a slider input for number of bins 
