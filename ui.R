@@ -43,16 +43,17 @@ time_series<-function(ba_category, year){
 # Define UI for application that draws a histogram
 ui <- fluidPage(
     navbarPage("Employment Discrimination Reporting",
-               tabPanel("Bases",selectInput("basis", "Select a basis to visualize", choices = ba_all),
+               tabPanel("Bases",
+                        selectInput("basis", "Select a basis to visualize", choices = ba_all),
                         selectInput("year", "Select which years to visualize", choices = year_choice)),
                                                        mainPanel(plotOutput("basisPlot")),
                tabPanel("Harms",
-                        selectInput("harm", "Select a harm to visualize", choices = har_all),
-               selectInput("year", "Select which years to visualize", choices = year_choice)),
-               mainPanel(plotOutput("harmPlot")),
+                        selectInput("harm", "Select a harm to visualize", choices = har_all, width = "50%"),
+                        selectInput("year", "Select which years to visualize", choices = year_choice)),
+               fluidPage(plotOutput("harmPlot")),
                tabPanel("Time Series",
                         selectInput("basis", "Select a basis to visualize", choices = ba_all)),
                #mainPanel(plotOutput("distPlot")),
                ))
 
-
+?fluidPage

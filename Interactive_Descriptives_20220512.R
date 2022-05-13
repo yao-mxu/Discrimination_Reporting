@@ -2,12 +2,8 @@
 # Discrimination Reporting
 # Interactive Descriptives
 # 5/12/22
-options(download.file.method = "wininet")
+
 shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
-
-devtools::install_github("yx1441/Discrimination_Reporting@master")
-
-
 # source("global.R")
 #install.packages("radiant.data")
 #install.packages("radiant", repos = "https://radiant-rstats.github.io/minicran/")
@@ -48,6 +44,7 @@ githubURL<-"https://github.com/yx1441/Discrimination_Reporting/blob/32862e023bc5
 load(url(githubURL))
 # source(githubURL)
 
+
 year_full<-c(2014,2015,2016,2017,2018,2019)
 year_4<-c(2015,2016,2017,2018)
 
@@ -76,11 +73,12 @@ har_all <-colnames(reporting_test)[str_detect(colnames(reporting_test),"har_")]
 # Define UI for application that draws a histogram
 ui <- fluidPage(
     navbarPage("Employment Discrimination Reporting",
-               tabPanel("Bases",selectInput("basis", "Select a basis to visualize", choices = ba_all),
+               tabPanel("Bases",
+                        fluidRow(column(width = 12, offset = 0, selectInput("basis", "Select a basis to visualize", choices = ba_all))),
                         selectInput("year", "Select which years to visualize", choices = year_choice)),
                                                        mainPanel(plotOutput("basisPlot")),
                tabPanel("Harms",
-                        selectInput("harm", "Select a harm to visualize", choices = har_all),
+                        selectInput("harm", "Select a harm to visualize", choices = har_all, width = "50%"),
                selectInput("year", "Select which years to visualize", choices = year_choice)),
                mainPanel(plotOutput("harmPlot")),
                tabPanel("Time Series",
@@ -103,7 +101,7 @@ server <- function(input, output) {
             time_series(input$harm,year_full)#+ylim(0,65)
         }
         if (input$year=="2015-2018"){
-            time_series(input$harm,year_4)#+ylim(0,65)
+            time_series(input$harm,year_4)+ylim(0,80)
         }
     })
     
