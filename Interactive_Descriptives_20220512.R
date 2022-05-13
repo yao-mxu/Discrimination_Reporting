@@ -19,8 +19,35 @@ library(ggplot2);library(reshape2);library(data.table);library(openxlsx);library
 library(maptools);library(tigris);library(leaflet);library(sf);library(maps);library(janitor);library(censusxy);library(dplyr);library(rgeos)
 library(geosphere); require(dplyr) 
 
-githubURL<-"https://github.com/yx1441/Discrimination_Reporting/blob/85ad65018eba9215b59772ab05fbef1388c062ca/reporting_test_20220512.RData"
+load_url <- function (url, ..., sha1 = NULL) {
+    # based very closely on code for devtools::source_url
+    stopifnot(is.character(url), length(url) == 1)
+    temp_file <- tempfile()
+    on.exit(unlink(temp_file))
+    request <- httr::GET(url)
+    httr::stop_for_status(request)
+    writeBin(httr::content(request, type = "raw"), temp_file)
+    file_sha1 <- digest::digest(file = temp_file, algo = "sha1")
+    if (is.null(sha1)) {
+        message("SHA-1 hash of file is ", file_sha1)
+    }
+    else {
+        if (nchar(sha1) < 6) {
+            stop("Supplied SHA-1 hash is too short (must be at least 6 characters)")
+        }
+        file_sha1 <- substr(file_sha1, 1, nchar(sha1))
+        if (!identical(file_sha1, sha1)) {
+            stop("SHA-1 hash of downloaded file (", file_sha1, 
+                 ")\n  does not match expected value (", sha1, 
+                 ")", call. = FALSE)
+        }
+    }
+    load(temp_file, envir = .GlobalEnv)
+}
+
+githubURL<-"https://github.com/yx1441/Discrimination_Reporting/blob/32862e023bc5a74444680df80720b9ab8c82d659/reporting_test_20220512.RData?raw=true"
 load(url(githubURL))
+# source(githubURL)
 
 year_full<-c(2014,2015,2016,2017,2018,2019)
 year_4<-c(2015,2016,2017,2018)
