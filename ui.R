@@ -22,7 +22,6 @@ load(url(githubURL))
 ba_all <-colnames(reporting_test)[str_detect(colnames(reporting_test),"ba_")]
 har_all <-colnames(reporting_test)[str_detect(colnames(reporting_test),"har_")]
 
-
 year_full<-c(2014,2015,2016,2017,2018,2019)
 year_4<-c(2015,2016,2017,2018)
 
