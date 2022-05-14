@@ -50,7 +50,7 @@ ui <- fluidPage(
                tabPanel("Harms",
                         selectInput("harm", "Select a harm to visualize", choices = har_all, width = "50%"),
                         selectInput("year", "Select which years to visualize", choices = year_choice)),
-               fluidPage(plotOutput("harmPlot")),
+               plotOutput("harmPlot"),
                tabPanel("Time Series",
                         selectInput("basis", "Select a basis to visualize", choices = ba_all)),
                #mainPanel(plotOutput("distPlot")),
