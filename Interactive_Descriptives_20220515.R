@@ -3,11 +3,11 @@
 # Interactive Descriptives
 # 5/15/22
 
-runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
+# runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
 
 library(shiny);library(tidyverse);library(devtools);library(readtext);library(xtable);library(janitor);library(cowplot)
 library(ggplot2);library(reshape2);library(data.table);library(openxlsx);library(rlang);library(ggpubr)
-library(leaflet);library(janitor);library(dplyr)
+library(leaflet);library(janitor);library(dplyr);library(corrplot)
 
 githubURL<-"https://github.com/yx1441/Discrimination_Reporting/blob/32862e023bc5a74444680df80720b9ab8c82d659/reporting_test_20220512.RData?raw=true"
 load(url(githubURL))
@@ -166,14 +166,45 @@ overall_time_series<-function(year, record_type2, time_unit){
     }
 }
 
-
+corrplot2 <- function(data, tl.pos="d", method = "pearson",sig.level = 0.05, order = "original",diag = FALSE, type = "upper",tl.srt = 90,number.font = 1,number.cex = 1,mar = c(0, 0, 0, 0)) {
+    data_incomplete <- data
+    data <- data[complete.cases(data), ]
+    mat <- cor(data, method = method,use = "complete.obs")
+    cor.mtest <- function(mat, method) {
+        mat <- as.matrix(mat)
+        n <- ncol(mat)
+        p.mat <- matrix(NA, n, n)
+        diag(p.mat) <- 0
+        for (i in 1:(n - 1)) {
+            for (j in (i + 1):n) {
+                tmp <- cor.test(mat[, i], mat[, j], method = method)
+                p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
+            }
+        }
+        colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
+        p.mat
+    }
+    p.mat <- cor.mtest(data, method = method)
+    col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
+    corrplot(mat,
+             method = "color", col = col(200), number.font = number.font,
+             mar = mar, number.cex = number.cex,
+             type = type, order = order,
+             addCoef.col = "black", # add correlation coefficient
+             tl.col = "black", tl.srt = tl.srt, # rotation of text labels combine with significance level
+             p.mat = p.mat, sig.level = sig.level, insig = "blank",# hide correlation coefficients on the diagonal
+             diag = diag
+    )
+}
 
 ba_all <-colnames(reporting_test)[str_detect(colnames(reporting_test),"ba_")]
 har_all <-colnames(reporting_test)[str_detect(colnames(reporting_test),"har_")]
 y_axis<-c("Percentage","Count")
 c_type<-c("Full","Complaint Only","Right to Sue Only")
 unit_choice<-c("By ISO weeks","By months", "By quarters", "By years")
-# mainPanel(plotOutput("basisPlot")),
+
+#mainPanel(plotOutput("basisPlot")),
+?get
 
 ui <- fluidPage(
     navbarPage("Employment Discrimination Reporting",
@@ -217,8 +248,18 @@ ui <- fluidPage(
                             ),
                         ),
                tabPanel("Correlations",
-                        selectInput("auto", "Select a harm", choices = har_all, width = "50%"),
-                        selectInput("year", "Select which years to visualize", choices = year_choice)),
+                        tabsetPanel(
+                            tabPanel("Bases", br(),
+                                     selectInput("ba_cor","Select bases to create correlation matrices",
+                                    ba_all, multiple = TRUE, width = "50%"), # selectInput("year", "Select which years to visualize", choices = year_choice)
+                                    plotOutput(outputId = "bacorPlot")),
+                            tabPanel("Harms", br(),
+                                     selectInput("har_cor","Select harms to create correlation matrices",
+                                                 har_all, multiple = TRUE, width = "50%"), # selectInput("year", "Select which years to visualize", choices = year_choice)
+                                     plotOutput(outputId = "harcorPlot")),
+                        
+                        )
+                        ),
                tabPanel("About",
                         "TABLE 1: COMPLAINTS FILED BY LAW IN 2017, 4346",
                         textOutput(outputId = "tab1_text"),
@@ -235,9 +276,18 @@ nrow(reporting_test[reporting_test$complaint_year==2016,])
 nrow(reporting_test[reporting_test$complaint_year==2015&reporting_test$record_type=="Employment",])
 nrow(reporting_test[reporting_test$complaint_year==2015,])
 
+#new_empl<-dat_empl[,1:20]
+#dat_empl<-subset(reporting_test[reporting_test$record_type=="Employment",], select=colnames(reporting_test)[str_detect(colnames(reporting_test),"ba_")])
+
 # overall_time_series(2015,"Complaint Only","By months")
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+    output$bacorPlot <- renderPlot({
+        corrplot2(data=reporting_test[,input$ba_cor], order = "original", diag = FALSE, type = "upper")
+    })
+    output$harcorPlot <- renderPlot({
+        corrplot2(data=reporting_test[,input$har_cor], order = "original", diag = FALSE, type = "upper")
+    })
     output$tab1_text <- renderText({"Employment complaints filed by law in 2017 is 4,346; 2018 4,216 (DFEH, 2017, p.9)
         15,832 FOR 2016, PAGE 8 (Of the total complaints received by the Department, 17,041 complaints were formally filed by DFEH in 2016. 
         This number includes 12,242 employment complaints filed along with a request for an immediate Right to Sue letter
