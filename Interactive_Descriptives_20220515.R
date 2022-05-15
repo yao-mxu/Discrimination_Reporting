@@ -3,8 +3,9 @@
 # Interactive Descriptives
 # 5/15/22
 
+library(shiny)
 # RUN FROM REPO
-# runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
+shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
 
 # LOAD PACKAGES ----------------------
 library(shiny);library(tidyverse);library(devtools);library(readtext);library(xtable);library(janitor);library(cowplot)

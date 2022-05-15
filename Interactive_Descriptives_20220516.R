@@ -3,9 +3,9 @@
 # Interactive Descriptives
 # 5/16/22
 
-# library(shiny)
+library(shiny)
 # RUN FROM REPO
-# shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
+shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
 
 # LOAD PACKAGES ----------------------
 library(shiny);library(tidyverse);library(devtools);library(readtext);library(xtable);library(janitor);library(cowplot)
@@ -255,41 +255,8 @@ corrplot2 <- function(data,method = "pearson",sig.level = 0.05, order = "origina
 ui <- fluidPage(
     navbarPage("Employment Discrimination Reporting",
                tabPanel("About",
-                        sidebarLayout(
-                            sidebarPanel(
-                                h2("Installation"),
-                                p("Shiny is available on CRAN, so you can install it in the usual way from your R console:"),
-                                code('install.packages("shiny")'),
-                                br(),
-                                br(),
-                                br(),
-                                br(),
-                                # img(src = "rstudio.png", height = 70, width = 200),
-                                br(),
-                                "Shiny is a product of ", 
-                                span("RStudio", style = "color:blue")
-                            ),
-                            mainPanel(
-                                h1("Introducing Shiny"),
-                                p("Shiny is a new package from RStudio that makes it ", 
-                                  em("incredibly easy "), 
-                                  "to build interactive web applications with R."),
-                                br(),
-                                p("For an introduction and live examples, visit the ",
-                                  a("Shiny homepage.", 
-                                    href = "http://shiny.rstudio.com")),
-                                br(),
-                                h2("Features"),
-                                p("- Build useful web applications with only a few lines of code—no JavaScript required."),
-                                p("- Shiny applications are automatically 'live' in the same way that ", 
-                                  strong("spreadsheets"),
-                                  " are live. Outputs change instantly as users modify inputs, without requiring a reload of the browser.")
-                            )
-                        ),
-                        "The Department of Fair Employment and Housing (DFEH) is responsible for 
-                        enforcing state laws that make it illegal to discriminate against a job applicant 
-                        or employee because of a protected characteristic.",
-                        # img(src = "flowchart.png", width = "100%")
+                        "TABLE 1: COMPLAINTS FILED BY LAW IN 2017, 4346",
+                        img(src = "/Users/yaoxu/DropboxProfMakovi/Dropbox/Discrimination_Reporting_Yao/Discrimination_Reporting/www/flowchart.png", height = 140, width = 400)
                         # dataTableOutput(outputId = "sum_table")
                ),
                tabPanel("Times Series",
@@ -516,7 +483,4 @@ server <- function(input, output) {
 
 # RUN FROM LOCAL----------------
 shinyApp(ui = ui, server = server)
-# runApp("app.R")
 
-
-    
