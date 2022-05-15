@@ -10,7 +10,7 @@
 library(shiny);library(tidyverse);library(devtools);library(readtext);library(xtable);library(janitor);library(cowplot)
 library(ggplot2);library(reshape2);library(data.table);library(openxlsx);library(rlang);library(ggpubr)
 library(leaflet);library(janitor);library(dplyr);library(corrplot)
-
+make_pct<-function(x){x<-x*100}
 # PREPARATION----------------------
 githubURL<-"https://github.com/yx1441/Discrimination_Reporting/blob/32862e023bc5a74444680df80720b9ab8c82d659/reporting_test_20220512.RData?raw=true"
 load(url(githubURL))
@@ -50,8 +50,16 @@ for (i in 1:length(colnames(reporting_test)[str_detect(colnames(reporting_test),
     num_co<-merge(num_co,data,by=c("count"),all.x=T)
 }
 
-sum(num_co$ba_disabilitypct,na.rm=T)
-cooc_full<-as.data.frame(row_to_names(transpose(num_co,keep.names="rn"),1,remove_row = T))
+sum(num_co$ba_disability_pct,na.rm=T)
+# <-as.data.frame(row_to_names(transpose(num_co,keep.names="rn"),1,remove_row = T))
+num_co[,colnames(num_co)[!str_detect(colnames(num_co), "pct")]]<-sapply(num_co[,colnames(num_co)[!str_detect(colnames(num_co), "pct")]],as.integer)
+num_co[,colnames(num_co)[str_detect(colnames(num_co), "pct")]]<-sapply(num_co[,colnames(num_co)[str_detect(colnames(num_co), "pct")]],make_pct)
+
+num_co<-num_co %>% mutate(across(where(is.numeric), ~ round(., 3)))
+
+# see<-as.data.frame(row_to_names(transpose(num_co,keep.names="rn"),1,remove_row = T))
+
+# num_co<-num_co %>% mutate(across(where(is.numeric), ~ make_pct(.)))
 # print(xtable(see[,1:12]), include.rownames=FALSE)
 
 
@@ -306,8 +314,8 @@ ui <- fluidPage(
                                          inline = TRUE),
                                      plotOutput(outputId = "harcorPlot", width = "100%")),
                             tabPanel("Bases and Harms", br(),
-                                     selectInput("har_cor2","Select harms to create correlation matrices", har_all, multiple = TRUE, width = "75%"),
                                      selectInput("ba_cor2","Select bases to create correlation matrices", ba_all, multiple = TRUE, width = "75%"),
+                                     selectInput("har_cor2","Select harms to create correlation matrices", har_all, multiple = TRUE, width = "75%"),
                                      # selectInput("year_cor", "Select which years to visualize", choices = year_choice),
                                      # radioButtons(
                                      #     "complaint_type_cor", "Select a case type: ", 
@@ -318,11 +326,18 @@ ui <- fluidPage(
                         
                         )
                         ),
-               tabPanel("About",
-                        "TABLE 1: COMPLAINTS FILED BY LAW IN 2017, 4346",
-                        textOutput(outputId = "tab1_text"),
+               tabPanel("Co-occurences",
+                        selectInput("ba_cor3","Select bases to see co-occurence counts", ba_all, multiple = TRUE, width = "75%"),
+                        # "TABLE 1: COMPLAINTS FILED BY LAW IN 2017, 4346",
+                        # textOutput(outputId = "tab1_text"),
                         dataTableOutput(outputId = "ic_table")
                         ),
+               tabPanel("About",
+                        selectInput("ba_cor3","Select bases to see co-occurence counts", ba_all, multiple = TRUE, width = "75%"),
+                        # "TABLE 1: COMPLAINTS FILED BY LAW IN 2017, 4346",
+                        textOutput(outputId = "tab1_text"),
+                        # dataTableOutput(outputId = "ic_table")
+               ),
                #mainPanel(plotOutput("distPlot")),
                ))
 
@@ -386,7 +401,15 @@ server <- function(input, output) {
         This number includes 12,242 employment complaints filed along with a request for an immediate Right to Sue letter
         and 4,799 complaints filed as the result of an intake interview conducted by a DFEH investigator.); 2015: PAGE 7 COMPLAINTS RECEIVED 
         Total Employment Complaints Received by Basis in 2015 = 20,505; 2014: In 2014, a total of 17,632 employment and 1,524 housing complaints were filed on the bases shown on the following page."})
-    output$ic_table <- renderDataTable({reporting_test[reporting_test$complaint_year==2017,]})
+    output$ic_table <- renderDataTable({
+        # colnames(num_co)[str_detect(colnames(num_co),input$ba_cor3)]
+        check<-NULL
+        for (i in 1:length(input$ba_cor3)){
+            check[[i]]<-num_co[,colnames(num_co)[str_detect(colnames(num_co),input$ba_cor3[i])]]
+        }
+        
+        cbind(count=num_co[,1],do.call(cbind,check))
+        })
     output$OPlot <- renderPlot({
         if (input$year_o=="2014-2019"){
             overall_time_series(year_full, input$record_type2, input$time_unit)
