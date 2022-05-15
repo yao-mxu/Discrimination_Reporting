@@ -3,16 +3,11 @@
 # Interactive Descriptives
 # 5/15/22
 
-# shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
-# source("global.R")
-#install.packages("radiant.data")
-#install.packages("radiant", repos = "https://radiant-rstats.github.io/minicran/")
-library(radiant.data)
-library(shiny)
-library(tidyverse);library(devtools);library(readtext);library(xtable);library(janitor);library(cowplot);library(survey);library(ggmap)
-library(ggplot2);library(reshape2);library(data.table);library(openxlsx);library(rlang);library(ggpubr);library(rgdal);library(spdep)
-library(leaflet);library(sf);library(maps);library(janitor);library(dplyr)
-library(geosphere); require(dplyr) 
+runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
+
+library(shiny);library(tidyverse);library(devtools);library(readtext);library(xtable);library(janitor);library(cowplot)
+library(ggplot2);library(reshape2);library(data.table);library(openxlsx);library(rlang);library(ggpubr)
+library(leaflet);library(janitor);library(dplyr)
 
 githubURL<-"https://github.com/yx1441/Discrimination_Reporting/blob/32862e023bc5a74444680df80720b9ab8c82d659/reporting_test_20220512.RData?raw=true"
 load(url(githubURL))
@@ -146,6 +141,29 @@ overall_time_series<-function(year, record_type2, time_unit){
             
         }
     }
+    else if (time_unit=="By years"){
+        if (record_type2=="Full"){
+            ggplot(reporting_test[reporting_test$complaint_year %in% year,], aes(x=complaint_year,fill=complaint_year)) + geom_bar(color="white")+ylab("Cases Filed")+xlab("By Years") +theme(#panel.grid.major = element_blank(),
+                axis.text.x=element_text(angle = 90,hjust=0.5,vjust=0.5,size = rel(1)),
+                axis.title.x=element_text(hjust=0.5,vjust=0.5,size = rel(0.9)),
+                axis.text.y=element_text(hjust=0.5,vjust=0.5,size = rel(1)),
+                legend.position  = "right",
+                panel.grid.minor = element_blank(),
+                panel.background = element_blank(),
+                axis.line = element_line(colour = "black"))+ labs(fill = "Complaint Year")
+            
+        } else {
+            ggplot(reporting_test[reporting_test$complaint_year %in% year & reporting_test$record_type2==record_type2,], aes(x=complaint_year,fill=complaint_year)) + geom_bar(color="white")+ylab("Cases Filed")+xlab("By Years") +theme(#panel.grid.major = element_blank(),
+                axis.text.x=element_text(angle = 90,hjust=0.5,vjust=0.5,size = rel(1)),
+                axis.title.x=element_text(hjust=0.5,vjust=0.5,size = rel(0.9)),
+                axis.text.y=element_text(hjust=0.5,vjust=0.5,size = rel(1)),
+                legend.position  = "right",
+                panel.grid.minor = element_blank(),
+                panel.background = element_blank(),
+                axis.line = element_line(colour = "black"))+ labs(fill = "Complaint Year")
+            
+        }
+    }
 }
 
 
@@ -154,8 +172,9 @@ ba_all <-colnames(reporting_test)[str_detect(colnames(reporting_test),"ba_")]
 har_all <-colnames(reporting_test)[str_detect(colnames(reporting_test),"har_")]
 y_axis<-c("Percentage","Count")
 c_type<-c("Full","Complaint Only","Right to Sue Only")
-unit_choice<-c("By ISO weeks","By months", "By quarters")
+unit_choice<-c("By ISO weeks","By months", "By quarters", "By years")
 # mainPanel(plotOutput("basisPlot")),
+
 ui <- fluidPage(
     navbarPage("Employment Discrimination Reporting",
                tabPanel("Times Series",
@@ -167,10 +186,6 @@ ui <- fluidPage(
                                      "record_type2", "Select a case type: ", 
                                      choices = c_type, 
                                      inline = TRUE),
-                                 # radioButtons(
-                                 #    "y_axis_o", "y axis: ", 
-                                 #    choices = y_axis, 
-                                 #    inline = TRUE),
                                  plotOutput(outputId = "OPlot") #, width = "1000px", height = "500px"
                                      ),
                             tabPanel("Bases",br(),
@@ -184,8 +199,6 @@ ui <- fluidPage(
                                      "y_axis", "y axis: ", 
                                      choices = y_axis, 
                                      inline = TRUE),
-                                 tableOutput(outputId = "tab1_table"),
-                                 textOutput(outputId  = "tab1_text"),
                                  plotOutput(outputId = "basisPlot")
                                  ),
                             tabPanel("Harms", br(),
@@ -206,13 +219,31 @@ ui <- fluidPage(
                tabPanel("Correlations",
                         selectInput("auto", "Select a harm", choices = har_all, width = "50%"),
                         selectInput("year", "Select which years to visualize", choices = year_choice)),
-               tabPanel("Time Series",
-                        selectInput("basis", "Select a basis", choices = ba_all)),
+               tabPanel("About",
+                        "TABLE 1: COMPLAINTS FILED BY LAW IN 2017, 4346",
+                        textOutput(outputId = "tab1_text"),
+                        dataTableOutput(outputId = "ic_table")
+                        ),
                #mainPanel(plotOutput("distPlot")),
                ))
-overall_time_series(2015,"Complaint Only","By months")
+nrow(reporting_test[reporting_test$complaint_year==2019&reporting_test$record_type=="Employment",])
+nrow(reporting_test[reporting_test$complaint_year==2017&reporting_test$record_type=="Employment",])
+nrow(reporting_test[reporting_test$complaint_year==2018&reporting_test$record_type=="Employment",])
+nrow(reporting_test[reporting_test$complaint_year==2016&reporting_test$record_type=="Employment",])
+nrow(reporting_test[reporting_test$complaint_year==2016,])
+
+nrow(reporting_test[reporting_test$complaint_year==2015&reporting_test$record_type=="Employment",])
+nrow(reporting_test[reporting_test$complaint_year==2015,])
+
+# overall_time_series(2015,"Complaint Only","By months")
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+    output$tab1_text <- renderText({"Employment complaints filed by law in 2017 is 4,346; 2018 4,216 (DFEH, 2017, p.9)
+        15,832 FOR 2016, PAGE 8 (Of the total complaints received by the Department, 17,041 complaints were formally filed by DFEH in 2016. 
+        This number includes 12,242 employment complaints filed along with a request for an immediate Right to Sue letter
+        and 4,799 complaints filed as the result of an intake interview conducted by a DFEH investigator.); 2015: PAGE 7 COMPLAINTS RECEIVED 
+        Total Employment Complaints Received by Basis in 2015 = 20,505; 2014: In 2014, a total of 17,632 employment and 1,524 housing complaints were filed on the bases shown on the following page."})
+    output$ic_table <- renderDataTable({reporting_test[reporting_test$complaint_year==2017,]})
     output$OPlot <- renderPlot({
         if (input$year_o=="2014-2019"){
             overall_time_series(year_full, input$record_type2, input$time_unit)
