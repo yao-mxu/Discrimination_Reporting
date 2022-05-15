@@ -8,6 +8,9 @@ Harms,
 Time Series Plots,
 Correlation Plots,
 
+
+
+note: Removed 1 rows containing missing values (position_stack). occurs when calculating percentages for 2014/11
 "Autocorrelation Plots"
 
 
