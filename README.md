@@ -13,4 +13,5 @@ Correlation Plots,
 note: Removed 1 rows containing missing values (position_stack). occurs when calculating percentages for 2014/11
 "Autocorrelation Plots"
 
-
+**Slow if running from Github**
+> Let's stay focused on what we discussed on Monday.
