@@ -25,9 +25,9 @@ Monday May 16th:
 
 *Implemented reactive UI fields, observed events and adjusted*
 
-~~1. Break down the co-occurence table by record type
-~2. Push to repo
-~3. Fix parts of about page
+~~1. Break down the co-occurence table by record type~~
+~~2. Push to repo~~
+~~3. Fix parts of about page~~
 
 
 
