@@ -3,9 +3,9 @@
 # Interactive Descriptives
 # 5/16/22
 
-library(shiny)
+# library(shiny)
 # RUN FROM REPO
-shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
+# shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
 
 # LOAD PACKAGES ----------------------
 library(shiny);library(tidyverse);library(devtools);library(readtext);library(xtable);library(janitor);library(cowplot)
@@ -16,7 +16,7 @@ make_pct<-function(x){x<-x*100}
 githubURL<-"https://github.com/yx1441/Discrimination_Reporting/blob/32862e023bc5a74444680df80720b9ab8c82d659/reporting_test_20220512.RData?raw=true"
 load(url(githubURL))
 reporting_test<- reporting_test %>% dplyr::mutate(record_type2=case_when(reporting_test$record_type=="Employment" ~ "Complaint Only",
-                                                            reporting_test$record_type=="Right to Sue" ~ "Right to Sue Only"))
+                                                                         reporting_test$record_type=="Right to Sue" ~ "Right to Sue Only"))
 
 reporting_test<-reporting_test %>% dplyr::rename(har_denied_envir_free_of_discrim=har_denied_a_work_environment_free_of_discrimination_or_retaliation,
                                                  har_asked_impermissible_questions=har_asked_impermissible_nonjobrelated_questions,
@@ -103,30 +103,30 @@ time_series<-function(reporting_test, ba_category, year, y_axis, harmorbasis){
     }
     
     else if (harmorbasis=="Harm"){
-    if (y_axis=="Percentage"){
-        see<-reporting_test[reporting_test$complaint_year %in% year,] %>% group_by(mth_case_file_date_new) %>%  mutate(percentage_month = mean(eval(parse(text=ba_category)))*100) %>% select(mth_case_file_date_new, percentage_month, complaint_year)%>% distinct()
-        ggplot(see, aes(x=mth_case_file_date_new,y=percentage_month,fill=complaint_year)) + geom_bar(stat="identity")+xlab("Months")+ylab(paste0("Cases Filed by Percentage")) +theme(#panel.grid.major = element_blank(),
-            axis.text.x=element_text(angle = 40, hjust=0.5,vjust=0.5,size = rel(1)),
-            axis.title.x=element_text(hjust=0.5,vjust=0.5,size = rel(0.9)),
-            axis.text.y=element_text(hjust=0.5,vjust=0.5,size = rel(1)),
-            legend.position  = "right",
-            panel.grid.minor = element_blank(),
-            panel.background = element_blank(),
-            axis.line = element_line(colour = "black"))+ylim(0,80)+ labs(fill = "Complaint Year")
-        # +theme(axis.text.x = element_text(angle = 90,size=6, vjust = 0.5, hjust=1))
-        
-    }
-   else {
-    ggplot(reporting_test[reporting_test$complaint_year %in% year,], aes(y=eval(parse(text=ba_category)),x=mth_case_file_date_new,fill=complaint_year)) + geom_bar(stat="identity")+ylab(paste0("Cases Filed by Count"))+xlab("By Months") +theme(#panel.grid.major = element_blank(),
-        axis.text.x=element_text(angle = 40,hjust=0.5,vjust=0.5,size = rel(1)),
-        axis.title.x=element_text(hjust=0.5,vjust=0.5,size = rel(0.9)),
-        axis.text.y=element_text(hjust=0.5,vjust=0.5,size = rel(1)),
-        legend.position  = "right",
-        panel.grid.minor = element_blank(),
-        panel.background = element_blank(),
-        axis.line = element_line(colour = "black"))+ labs(fill = "Complaint Year")+ylim(0,1200)
-   }}
-    }
+        if (y_axis=="Percentage"){
+            see<-reporting_test[reporting_test$complaint_year %in% year,] %>% group_by(mth_case_file_date_new) %>%  mutate(percentage_month = mean(eval(parse(text=ba_category)))*100) %>% select(mth_case_file_date_new, percentage_month, complaint_year)%>% distinct()
+            ggplot(see, aes(x=mth_case_file_date_new,y=percentage_month,fill=complaint_year)) + geom_bar(stat="identity")+xlab("Months")+ylab(paste0("Cases Filed by Percentage")) +theme(#panel.grid.major = element_blank(),
+                axis.text.x=element_text(angle = 40, hjust=0.5,vjust=0.5,size = rel(1)),
+                axis.title.x=element_text(hjust=0.5,vjust=0.5,size = rel(0.9)),
+                axis.text.y=element_text(hjust=0.5,vjust=0.5,size = rel(1)),
+                legend.position  = "right",
+                panel.grid.minor = element_blank(),
+                panel.background = element_blank(),
+                axis.line = element_line(colour = "black"))+ylim(0,80)+ labs(fill = "Complaint Year")
+            # +theme(axis.text.x = element_text(angle = 90,size=6, vjust = 0.5, hjust=1))
+            
+        }
+        else {
+            ggplot(reporting_test[reporting_test$complaint_year %in% year,], aes(y=eval(parse(text=ba_category)),x=mth_case_file_date_new,fill=complaint_year)) + geom_bar(stat="identity")+ylab(paste0("Cases Filed by Count"))+xlab("By Months") +theme(#panel.grid.major = element_blank(),
+                axis.text.x=element_text(angle = 40,hjust=0.5,vjust=0.5,size = rel(1)),
+                axis.title.x=element_text(hjust=0.5,vjust=0.5,size = rel(0.9)),
+                axis.text.y=element_text(hjust=0.5,vjust=0.5,size = rel(1)),
+                legend.position  = "right",
+                panel.grid.minor = element_blank(),
+                panel.background = element_blank(),
+                axis.line = element_line(colour = "black"))+ labs(fill = "Complaint Year")+ylim(0,1200)
+        }}
+}
 overall_time_series<-function(year, record_type2, time_unit){
     if (time_unit=="By quarters"){
         if (record_type2=="Full"){
@@ -255,61 +255,97 @@ corrplot2 <- function(data,method = "pearson",sig.level = 0.05, order = "origina
 ui <- fluidPage(
     navbarPage("Employment Discrimination Reporting",
                tabPanel("About",
-                        "TABLE 1: COMPLAINTS FILED BY LAW IN 2017, 4346",
-                        img(src = "/Users/yaoxu/DropboxProfMakovi/Dropbox/Discrimination_Reporting_Yao/Discrimination_Reporting/www/flowchart.png", height = 140, width = 400)
+                        sidebarLayout(
+                            sidebarPanel(
+                                h4("Project Progress"),
+                                p("Preliminary Data Analysis"),
+                                code('install.packages("shiny")'),
+                                p("Running this application from local machine"),
+                                code('shinyApp(ui = ui, server = server)'),
+                                p("Running this application from Github Repository"),
+                                code("shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')"),
+                                br(),
+                                # img(src = "flowchart.png", height = 200, width = 200),
+                                br(),
+                                "Note: running from Github may take 7-8 minutes "
+                                # span("RStudio", style = "color:blue")
+                            ),
+                            mainPanel(
+                                h3("Introducing the DFEH dataset"),
+                                p("The Department of Fair Employment and Housing (DFEH) is responsible for 
+                                  enforcing state laws that make it illegal to discriminate against a job applicant 
+                                  or employee because of a protected characteristic; visit ", 
+                                  a("DFEH annual reports and statistics", 
+                                    href = "https://www.dfeh.ca.gov/legalrecords/?content=reports#reportsBody")),
+                                br(),
+                                p("For current RA Work progress, visit this ",
+                                  a("Google Drive Folder", 
+                                    href = "https://drive.google.com/drive/folders/1LjMFuztpKktHIwU-FXDCc7xjl7aMEnkA?usp=sharing")),
+                                br(),
+                                p("For data and code of this application, visit our ",
+                                  a("Discrimination Reporting Github Repository", 
+                                    href = "https://github.com/yx1441/Discrimination_Reporting")),
+                                br(),
+                                h3("Features of this application"),
+                                p("- Time series figures by bases/harms, record type, year range, and by count/percentage."),
+                                p("- Correlation matrices and co-occurence counts tables by bases/harms, record type, and year range."),
+                                p("- Links to resources"),
+                            )
+                        ),
+                        # img(src = "flowchart.png", width = "100%")
                         # dataTableOutput(outputId = "sum_table")
                ),
                tabPanel("Times Series",
                         tabsetPanel(
                             tabPanel("Overall Trends", br(),
-                                 selectInput("time_unit", "Select a time unit", choices = unit_choice),
-                                 selectInput("year_o", "Select a year range", choices = year_choice),
-                                 radioButtons(
-                                     "record_type2", "Select a case type: ", 
-                                     choices = c_type, 
-                                     inline = TRUE),
-                                 plotOutput(outputId = "OPlot") #, width = "1000px", height = "500px"
-                                     ),
+                                     selectInput("time_unit", "Select a time unit", choices = unit_choice),
+                                     selectInput("year_o", "Select a year range", choices = year_choice),
+                                     radioButtons(
+                                         "record_type2", "Select a case type: ", 
+                                         choices = c_type, 
+                                         inline = TRUE),
+                                     plotOutput(outputId = "OPlot") #, width = "1000px", height = "500px"
+                            ),
                             tabPanel("Bases",br(),
-                                 selectInput("basis", "Select a basis", choices = ba_all),
-                                 selectInput("year", "Select a year range", choices = year_choice),
-                                 radioButtons(
-                                     "complaint_type", "Select a case type: ", 
-                                     choices = c_type, 
-                                     inline = TRUE),
-                                 radioButtons(
-                                     "y_axis", "y axis: ", 
-                                     choices = y_axis, 
-                                     inline = TRUE),
-                                 plotOutput(outputId = "basisPlot")
-                                 ),
+                                     selectInput("basis", "Select a basis", choices = ba_all),
+                                     selectInput("year", "Select a year range", choices = year_choice),
+                                     radioButtons(
+                                         "complaint_type", "Select a case type: ", 
+                                         choices = c_type, 
+                                         inline = TRUE),
+                                     radioButtons(
+                                         "y_axis", "y axis: ", 
+                                         choices = y_axis, 
+                                         inline = TRUE),
+                                     plotOutput(outputId = "basisPlot")
+                            ),
                             tabPanel("Harms", br(),
-                                 selectInput("harm", "Select a harm", choices = har_all, width = "50%"),
-                                 selectInput("year2", "Select a year range", choices = year_choice),
-                                 radioButtons(
-                                     "complaint_type2", "Select a case type: ", 
-                                     choices = c_type, 
-                                     inline = TRUE),
-                                 radioButtons(
-                                     "y_axis2", "y axis: ", 
-                                     choices = y_axis,
-                                     inline = TRUE),
-                                 plotOutput(outputId = "harmPlot")
-                                 ),
+                                     selectInput("harm", "Select a harm", choices = har_all, width = "50%"),
+                                     selectInput("year2", "Select a year range", choices = year_choice),
+                                     radioButtons(
+                                         "complaint_type2", "Select a case type: ", 
+                                         choices = c_type, 
+                                         inline = TRUE),
+                                     radioButtons(
+                                         "y_axis2", "y axis: ", 
+                                         choices = y_axis,
+                                         inline = TRUE),
+                                     plotOutput(outputId = "harmPlot")
                             ),
                         ),
+               ),
                tabPanel("Correlations",
                         tabsetPanel(
                             tabPanel("Bases Only", br(),
                                      selectInput("ba_cor","Select bases to create correlation matrices", ba_all, multiple = TRUE, width = "75%"),
                                      selectInput("year_cor", "Select which years to visualize", choices = year_choice),
                                      radioButtons(
-                                        "complaint_type_cor", "Select a case type: ", 
-                                        choices = c_type, 
-                                        inline = TRUE),
-                                    
-                                    plotOutput(outputId = "bacorPlot", width = "100%")),
-
+                                         "complaint_type_cor", "Select a case type: ", 
+                                         choices = c_type, 
+                                         inline = TRUE),
+                                     
+                                     plotOutput(outputId = "bacorPlot", width = "100%")),
+                            
                             tabPanel("Harms Only", br(),
                                      selectInput("har_cor","Select harms to create correlation matrices",
                                                  har_all, multiple = TRUE, width = "75%"),
@@ -328,33 +364,57 @@ ui <- fluidPage(
                                      #     choices = c_type, 
                                      #    inline = TRUE),
                                      plotOutput(outputId = "cocorPlot", width = "100%")
-                                     ),
-                        
+                            ),
+                            
                         )
-                        ),
+               ),
                tabPanel("Co-occurences",
                         selectInput("ba_cor3","Select bases to see co-occurence counts", ba_all, multiple = TRUE, width = "75%"),
                         # "TABLE 1: COMPLAINTS FILED BY LAW IN 2017, 4346",
                         # textOutput(outputId = "tab1_text"),
                         dataTableOutput(outputId = "ic_table")
-                        ),
-               tabPanel("About",
-                        selectInput("ba_cor3","Select bases to see co-occurence counts", ba_all, multiple = TRUE, width = "75%"),
-                        # "TABLE 1: COMPLAINTS FILED BY LAW IN 2017, 4346",
-                        textOutput(outputId = "tab1_text"),
+               ),
+               tabPanel("Fun",
+                        "Throwing in one last figure here:",
+                        br(),
+                        br(),
+                        sliderInput("color",
+                                    label = "If you are feeling a little gray, make your heart a different color?",
+                                    min = 0,
+                                    max = 1,
+                                    value = 0,
+                                    step = 0.1,
+                                    width = "40%"),
+                        sliderInput("color2",
+                                    label = "",
+                                    min = 0,
+                                    max = 1,
+                                    value = 0,
+                                    step = 0.1,
+                                    width = "40%"),
+                        plotOutput(outputId = "heart", width = "400px", height = "400px")
                         # dataTableOutput(outputId = "ic_table")
                ),
                #mainPanel(plotOutput("distPlot")),
-               ))
+    ))
 
+
+dat <- data.frame(t = seq(0, 2*pi, by = 0.01))
+x <-  function(t) 16 * sin(t)^3
+y <- function(t) 13*cos(t) - 5*cos(2*t) - 2*cos(3*t) - cos(4*t)
+dat$y <- y(dat$t)
+dat$x <- x(dat$t)
 
 # plotOutput(outputId = "bacorPlot", width = "100%")
 # SERVER  --------------
 server <- function(input, output) {
-    output$sum_table <- renderDataTable({reporting_test})
+    output$heart<- renderPlot({ 
+      ggplot(dat, aes(x,y)) +geom_polygon(fill = rgb(input$color,input$color2,0.4,0.3)) +theme_classic()+xlab("")+ylab("")
+    })
+    #output$sum_table <- renderDataTable({reporting_test})
     output$cocorPlot<- renderPlot({ 
         corrplot2(data=reporting_test[,c(input$ba_cor2,input$har_cor2)], order = "original", diag = FALSE, type = "upper")
-        })
+    })
     output$bacorPlot <- renderPlot({
         if (input$complaint_type_cor=="Full"){
             if (input$year_cor=="2014-2019"){
@@ -417,7 +477,7 @@ server <- function(input, output) {
         }
         
         cbind(count=num_co[,1],do.call(cbind,check))
-        })
+    })
     output$OPlot <- renderPlot({
         if (input$year_o=="2014-2019"){
             overall_time_series(year_full, input$record_type2, input$time_unit)
@@ -425,7 +485,7 @@ server <- function(input, output) {
         else if (input$year_o=="2015-2018"){
             overall_time_series(year_4, input$record_type2, input$time_unit)
         }
-            })
+    })
     output$basisPlot <- renderPlot({
         if (input$complaint_type=="Full"){
             if (input$year=="2014-2019"){
@@ -483,4 +543,4 @@ server <- function(input, output) {
 
 # RUN FROM LOCAL----------------
 shinyApp(ui = ui, server = server)
-
+# runApp("app.R")
