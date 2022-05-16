@@ -397,10 +397,10 @@ ui <- fluidPage(
                                    
                                    selectInput("har_cooc","Select harms to see co-occurence counts and percentages",har_all, multiple = TRUE, width = "75%"),
                                    #selectInput("year_cor2", "Select which years to visualize", choices = year_choice),
-                                   #radioButtons(
-                                   #  "complaint_type_cooc2", "Select a case type: ", 
-                                   #  choices = c_type, 
-                                   #  inline = TRUE),
+                                   radioButtons(
+                                     "complaint_type_cooc2", "Select a case type: ", 
+                                     choices = c_type, 
+                                     inline = TRUE),
                                    dataTableOutput(outputId = "ic_table_har")),
                         )
                ),
@@ -500,21 +500,32 @@ server <- function(input, output, session) {
         and 4,799 complaints filed as the result of an intake interview conducted by a DFEH investigator.); 2015: PAGE 7 COMPLAINTS RECEIVED 
         Total Employment Complaints Received by Basis in 2015 = 20,505; 2014: In 2014, a total of 17,632 employment and 1,524 housing complaints were filed on the bases shown on the following page."})
     
-    output$ic_table_har <- renderDataTable({
-      # colnames(num_co)[str_detect(colnames(num_co),input$ba_cor3)]
-      check<-NULL
-      for (i in 1:length(input$har_cooc)){
-        check[[i]]<-full_cooc_har[,colnames(full_cooc_har)[str_detect(colnames(full_cooc_har),input$har_cooc[i])]]
+    # Outputting the harms co oc table
+      output$ic_table_har <- renderDataTable({
+      if (input$complaint_type_cooc2=="Full"){
+        check2<-NULL
+        for (i in 1:length(input$har_cooc)){
+          check2[[i]]<-full_cooc_har[,colnames(full_cooc_har)[str_detect(colnames(full_cooc_har),input$har_cooc[i])]]
+        }
+        cbind(count=full_cooc_har[,1],do.call(cbind,check2))
       }
-      cbind(count=num_co[,1],do.call(cbind,check))
+      else if (input$complaint_type_cooc2=="Complaint Only"){
+        check2<-NULL
+        for (i in 1:length(input$har_cooc)){
+          check2[[i]]<-empl_cooc_har[,colnames(empl_cooc_har)[str_detect(colnames(empl_cooc_har),input$har_cooc[i])]]
+        }
+        cbind(count=empl_cooc_har[,1],do.call(cbind,check2))
+      }
+      else if (input$complaint_type_cooc2=="Right to Sue Only") {
+        check2<-NULL
+        for (i in 1:length(input$har_cooc)){
+          check2[[i]]<-rts_cooc_har[,colnames(rts_cooc_har)[str_detect(colnames(rts_cooc_har),input$har_cooc[i])]]
+        }
+        cbind(count=rts_cooc_har[,1],do.call(cbind,check2))
+      }
+      # colnames(num_co)[str_detect(colnames(num_co),input$ba_cor3)
     })
     # Reactive UI for when complaint is selected!!
-    #observeEvent(req(input$complaint_type_cooc=="Complaint Only"), {
-     # showModal(modalDialog(
-     #   title = "my message",
-    #    "This should only appear when the checkbox is TRUE, given that the_user is FALSE"
-    #  ))   
-    #})
     observeEvent(input$complaint_type_cooc, {
       if (input$complaint_type_cooc=="Complaint Only"){
         updateSelectInput(session, "ba_cooc",label ="Select bases to see co-occurence counts and percentages", ba_all_noUnknown)
@@ -536,16 +547,16 @@ server <- function(input, output, session) {
       else if (input$complaint_type_cooc=="Complaint Only"){
         check2<-NULL
         for (i in 1:length(input$ba_cooc)){
-          check2[[i]]<-full_cooc_ba[,colnames(empl_cooc_ba)[str_detect(colnames(empl_cooc_ba),input$ba_cooc[i])]]
+          check2[[i]]<-empl_cooc_ba[,colnames(empl_cooc_ba)[str_detect(colnames(empl_cooc_ba),input$ba_cooc[i])]]
         }
-        cbind(count=full_cooc_ba[,1],do.call(cbind,check2))
+        cbind(count=empl_cooc_ba[,1],do.call(cbind,check2))
       }
       else if (input$complaint_type_cooc=="Right to Sue Only") {
         check2<-NULL
         for (i in 1:length(input$ba_cooc)){
-          check2[[i]]<-full_cooc_ba[,colnames(rts_cooc_ba)[str_detect(colnames(rts_cooc_ba),input$ba_cooc[i])]]
+          check2[[i]]<-rts_cooc_ba[,colnames(rts_cooc_ba)[str_detect(colnames(rts_cooc_ba),input$ba_cooc[i])]]
         }
-        cbind(count=full_cooc_ba[,1],do.call(cbind,check2))
+        cbind(count=rts_cooc_ba[,1],do.call(cbind,check2))
       }
         # colnames(num_co)[str_detect(colnames(num_co),input$ba_cor3)
     })
