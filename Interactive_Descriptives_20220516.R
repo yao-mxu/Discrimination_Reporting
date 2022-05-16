@@ -6,6 +6,9 @@
 # library(shiny)
 # RUN FROM REPO
 # shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
+# options(shiny.error = function() {
+#   stop("An error has occurred")
+# })
 
 # LOAD PACKAGES ----------------------
 library(shiny);library(tidyverse);library(devtools);library(readtext);library(xtable);library(janitor);library(cowplot)
@@ -27,6 +30,7 @@ reporting_test<-reporting_test %>% dplyr::rename(har_denied_envir_free_of_discri
                                                  har_unequal_considerations_in_empl_decisions=har_failed_to_give_equal_considerations_in_making_employment_decisions)
 
 ba_all <-colnames(reporting_test)[str_detect(colnames(reporting_test),"ba_")]
+ba_all_noUnknown<-ba_all[!str_detect(ba_all,"unknown")]
 har_all <-colnames(reporting_test)[str_detect(colnames(reporting_test),"har_")]
 y_axis<-c("Percentage","Count")
 c_type<-c("Full","Complaint Only","Right to Sue Only")
@@ -40,28 +44,34 @@ reporting_test_1518<-reporting_test[reporting_test$complaint_year %in% c(2015:20
 dat_empl_1518<-subset(dat_empl[dat_empl$record_type=="Employment",])
 dat_rts_1518<-subset(dat_rts[dat_rts$record_type=="Right to Sue",])
 
-c <- reporting_test %>% rowwise() %>% mutate(sum = sum(across(starts_with("ba_")), na.rm = T))
 
-num_co<-data.frame(count=seq(1:21)-1)
-for (i in 1:length(colnames(reporting_test)[str_detect(colnames(reporting_test),"ba_")])){
+# 20 counts
+get_cooccurences<-function(reporting_test,ba_or_har){
+  c <- reporting_test %>% rowwise() %>% mutate(sum = sum(across(starts_with(ba_or_har)), na.rm = T))
+  num_co<-data.frame(count=seq(1:21)-1)
+  for (i in 1:length(colnames(c)[str_detect(colnames(c),ba_or_har)])){
     data<-NULL
-    data<-data.frame(table(c$sum[c[[colnames(reporting_test)[str_detect(colnames(reporting_test),"ba_")][i]]]==1]-1))
-    colnames(data)<-c("count",colnames(reporting_test)[str_detect(colnames(reporting_test),"ba_")][i])
-    data[[paste0(colnames(reporting_test)[str_detect(colnames(reporting_test),"ba_")][i],"_pct")]]<-data[[colnames(reporting_test)[str_detect(colnames(reporting_test),"ba_")][i]]]/sum(reporting_test[[colnames(reporting_test)[str_detect(colnames(reporting_test),"ba_")][i]]])
-    num_co<-merge(num_co,data,by=c("count"),all.x=T)
+    data<-data.frame(table(c$sum[c[[colnames(c)[str_detect(colnames(c),ba_or_har)][i]]]==1]-1))
+    if (nrow(data.frame(table(c$sum[c[[colnames(c)[str_detect(colnames(c),ba_or_har)][i]]]==1])))!=0){
+      colnames(data)<-c("count",colnames(c)[str_detect(colnames(c),ba_or_har)][i])
+      data[[paste0(colnames(c)[str_detect(colnames(c),ba_or_har)][i],"_pct")]]<-data[[colnames(c)[str_detect(colnames(c),ba_or_har)][i]]]/sum(c[[colnames(c)[str_detect(colnames(c),ba_or_har)][i]]])
+      num_co<-merge(num_co,data,by=c("count"),all.x=T) 
+    }
+  }
+
+  num_co[,colnames(num_co)[!str_detect(colnames(num_co), "pct")]]<-sapply(num_co[,colnames(num_co)[!str_detect(colnames(num_co), "pct")]],as.integer)
+  num_co[,colnames(num_co)[str_detect(colnames(num_co), "pct")]]<-sapply(num_co[,colnames(num_co)[str_detect(colnames(num_co), "pct")]],make_pct)
+  num_co<-num_co %>% mutate(across(where(is.numeric), ~ round(., 3)))
+  return(num_co)
 }
 
-sum(num_co$ba_disability_pct,na.rm=T)
-# <-as.data.frame(row_to_names(transpose(num_co,keep.names="rn"),1,remove_row = T))
-num_co[,colnames(num_co)[!str_detect(colnames(num_co), "pct")]]<-sapply(num_co[,colnames(num_co)[!str_detect(colnames(num_co), "pct")]],as.integer)
-num_co[,colnames(num_co)[str_detect(colnames(num_co), "pct")]]<-sapply(num_co[,colnames(num_co)[str_detect(colnames(num_co), "pct")]],make_pct)
+full_cooc_ba<-get_cooccurences(reporting_test,"ba_")
+empl_cooc_ba<-get_cooccurences(reporting_test[reporting_test$record_type=="Employment",],"ba_")
+rts_cooc_ba<-get_cooccurences(reporting_test[reporting_test$record_type=="Right to Sue",],"ba_")
 
-num_co<-num_co %>% mutate(across(where(is.numeric), ~ round(., 3)))
-
-# see<-as.data.frame(row_to_names(transpose(num_co,keep.names="rn"),1,remove_row = T))
-
-# num_co<-num_co %>% mutate(across(where(is.numeric), ~ make_pct(.)))
-# print(xtable(see[,1:12]), include.rownames=FALSE)
+full_cooc_har<-get_cooccurences(reporting_test,"har_")
+empl_cooc_har<-get_cooccurences(reporting_test[reporting_test$record_type=="Employment",],"har_")
+rts_cooc_har<-get_cooccurences(reporting_test[reporting_test$record_type=="Right to Sue",],"har_")
 
 
 # Check data inconsistencies w.r.t. annual reports from DFEH
@@ -369,10 +379,30 @@ ui <- fluidPage(
                         )
                ),
                tabPanel("Co-occurences",
-                        selectInput("ba_cor3","Select bases to see co-occurence counts", ba_all, multiple = TRUE, width = "75%"),
-                        # "TABLE 1: COMPLAINTS FILED BY LAW IN 2017, 4346",
-                        # textOutput(outputId = "tab1_text"),
-                        dataTableOutput(outputId = "ic_table")
+                        tabsetPanel(
+                          tabPanel("Bases", br(),
+                                   selectInput("ba_cooc","Select bases to see co-occurence counts and percentages", ba_all, multiple = TRUE, width = "75%"),
+                                   #selectInput("year_co", "Select which years to visualize", choices = year_choice),
+                                   radioButtons(
+                                     "complaint_type_cooc", "Select a case type: ", 
+                                     choices = c_type, 
+                                     inline = TRUE),
+                                   dataTableOutput(outputId = "ic_table_ba")),
+                          
+                          tabPanel("Harms", br(), 
+                                   # HIDING ERROR MESSAGES AT THE BEGINNING
+                                   tags$style(type="text/css",
+                                              ".shiny-output-error { visibility: hidden; }",
+                                              ".shiny-output-error:before { visibility: hidden; }"),
+                                   
+                                   selectInput("har_cooc","Select harms to see co-occurence counts and percentages",har_all, multiple = TRUE, width = "75%"),
+                                   #selectInput("year_cor2", "Select which years to visualize", choices = year_choice),
+                                   #radioButtons(
+                                   #  "complaint_type_cooc2", "Select a case type: ", 
+                                   #  choices = c_type, 
+                                   #  inline = TRUE),
+                                   dataTableOutput(outputId = "ic_table_har")),
+                        )
                ),
                tabPanel("Fun",
                         "Throwing in one last figure here:",
@@ -407,7 +437,7 @@ dat$x <- x(dat$t)
 
 # plotOutput(outputId = "bacorPlot", width = "100%")
 # SERVER  --------------
-server <- function(input, output) {
+server <- function(input, output, session) {
     output$heart<- renderPlot({ 
       ggplot(dat, aes(x,y)) +geom_polygon(fill = rgb(input$color,input$color2,0.4,0.3)) +theme_classic()+xlab("")+ylab("")
     })
@@ -469,14 +499,55 @@ server <- function(input, output) {
         This number includes 12,242 employment complaints filed along with a request for an immediate Right to Sue letter
         and 4,799 complaints filed as the result of an intake interview conducted by a DFEH investigator.); 2015: PAGE 7 COMPLAINTS RECEIVED 
         Total Employment Complaints Received by Basis in 2015 = 20,505; 2014: In 2014, a total of 17,632 employment and 1,524 housing complaints were filed on the bases shown on the following page."})
-    output$ic_table <- renderDataTable({
-        # colnames(num_co)[str_detect(colnames(num_co),input$ba_cor3)]
-        check<-NULL
-        for (i in 1:length(input$ba_cor3)){
-            check[[i]]<-num_co[,colnames(num_co)[str_detect(colnames(num_co),input$ba_cor3[i])]]
+    
+    output$ic_table_har <- renderDataTable({
+      # colnames(num_co)[str_detect(colnames(num_co),input$ba_cor3)]
+      check<-NULL
+      for (i in 1:length(input$har_cooc)){
+        check[[i]]<-full_cooc_har[,colnames(full_cooc_har)[str_detect(colnames(full_cooc_har),input$har_cooc[i])]]
+      }
+      cbind(count=num_co[,1],do.call(cbind,check))
+    })
+    # Reactive UI for when complaint is selected!!
+    #observeEvent(req(input$complaint_type_cooc=="Complaint Only"), {
+     # showModal(modalDialog(
+     #   title = "my message",
+    #    "This should only appear when the checkbox is TRUE, given that the_user is FALSE"
+    #  ))   
+    #})
+    observeEvent(input$complaint_type_cooc, {
+      if (input$complaint_type_cooc=="Complaint Only"){
+        updateSelectInput(session, "ba_cooc",label ="Select bases to see co-occurence counts and percentages", ba_all_noUnknown)
+        }}) 
+    observeEvent(input$complaint_type_cooc, {
+      if (input$complaint_type_cooc!="Complaint Only"){
+        updateSelectInput(session, "ba_cooc",label ="Select bases to see co-occurence counts and percentages", ba_all)
+      }})  
+    
+    # Outputting the basis co oc table
+    output$ic_table_ba <- renderDataTable({
+      if (input$complaint_type_cooc=="Full"){
+        check2<-NULL
+        for (i in 1:length(input$ba_cooc)){
+          check2[[i]]<-full_cooc_ba[,colnames(full_cooc_ba)[str_detect(colnames(full_cooc_ba),input$ba_cooc[i])]]
         }
-        
-        cbind(count=num_co[,1],do.call(cbind,check))
+        cbind(count=full_cooc_ba[,1],do.call(cbind,check2))
+      }
+      else if (input$complaint_type_cooc=="Complaint Only"){
+        check2<-NULL
+        for (i in 1:length(input$ba_cooc)){
+          check2[[i]]<-full_cooc_ba[,colnames(empl_cooc_ba)[str_detect(colnames(empl_cooc_ba),input$ba_cooc[i])]]
+        }
+        cbind(count=full_cooc_ba[,1],do.call(cbind,check2))
+      }
+      else if (input$complaint_type_cooc=="Right to Sue Only") {
+        check2<-NULL
+        for (i in 1:length(input$ba_cooc)){
+          check2[[i]]<-full_cooc_ba[,colnames(rts_cooc_ba)[str_detect(colnames(rts_cooc_ba),input$ba_cooc[i])]]
+        }
+        cbind(count=full_cooc_ba[,1],do.call(cbind,check2))
+      }
+        # colnames(num_co)[str_detect(colnames(num_co),input$ba_cor3)
     })
     output$OPlot <- renderPlot({
         if (input$year_o=="2014-2019"){
