@@ -17,3 +17,19 @@ note: Removed 1 rows containing missing values (position_stack). occurs when cal
 
 **Slow if running from Github**
 > Let's stay focused on what we discussed on Monday.
+
+
+
+
+Monday May 16th:
+1. Break down the co-occurence table by record type
+2. Push to repo
+3. Fix parts of about page
+
+
+
+
+
+
+
+
