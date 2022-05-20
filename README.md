@@ -12,17 +12,16 @@ Features of this application:
 ## Notes
 
 Bases,
-Harms,
+Clean Harms,
 Time Series Plots,
 Correlation Plots,
+Table
 
 [DFEH Official Website](https://www.dfeh.ca.gov).
 
-note: Removed 1 rows containing missing values (position_stack). occurs when calculating percentages for 2014/11 "Autocorrelation Plots"
+Note: Removed 1 rows containing missing values (position_stack). occurs when calculating percentages for 2014/11 "Autocorrelation Plots", substantively fine
 
 **Slow if running from Github**
-
-> Let's stay focused on what we discussed on Monday.
 
 
 Monday May 16th:
@@ -33,6 +32,7 @@ Monday May 16th:
 ~~2. Push to repo~~
 ~~3. Fix parts of about page~~
 
+> Let's stay focused on what we discussed on Monday.
 
 
 
