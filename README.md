@@ -9,6 +9,9 @@ Features of this application:
 2. Correlation matrices and co-occurence counts tables by bases/harms, record type, and year range 
 3. Links to resources
 
+## Flowchart of Employment Complaints (aka Cases)
+/assets/images/flowchart.png
+
 ## How to run
 Running this application from Github:
 
