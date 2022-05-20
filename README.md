@@ -13,15 +13,14 @@ Features of this application:
 Running this application from Github:
 
 ```
-shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
+runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
 ```      
 
 Running this application from local:
 ```
-shiny::shinyApp(ui = ui, server = server)
+shinyApp(ui = ui, server = server)
 ```  
-Alternatively, hitting 
-"Run App" or type in 
+Alternatively, hitting the "Run App" button in Rstudio or type in 
 ```
 runApp("app.R")
 ```  
