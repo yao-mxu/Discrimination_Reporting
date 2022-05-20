@@ -5,7 +5,7 @@
 
 # library(shiny)
 # RUN FROM REPO
-shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
+# shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
 # options(shiny.error = function() {
 #   stop("An error has occurred")
 # })
@@ -276,8 +276,12 @@ ui <- fluidPage(
                                 h4("Project Progress"),
                                 p("Preliminary Data Analysis"),
                                 code('install.packages("shiny")'),
+                                br(),
+                                br(),
                                 p("Running this application from local machine"),
                                 code('shinyApp(ui = ui, server = server)'),
+                                br(),
+                                br(),
                                 p("Running this application from Github Repository"),
                                 code("shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')"),
                                 br(),
