@@ -8,7 +8,13 @@ Features of this application:
 1. Time series figures by bases/harms, record type, year range, and by count/percentage
 2. Correlation matrices and co-occurence counts tables by bases/harms, record type, and year range 
 3. Links to resources
-                                
+
+## How to run
+Running this application from Github:
+
+```
+shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
+```                               
 ## Notes
 
 Bases,
