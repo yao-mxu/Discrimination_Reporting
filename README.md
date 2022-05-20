@@ -9,8 +9,8 @@ Features of this application:
 2. Correlation matrices and co-occurence counts tables by bases/harms, record type, and year range 
 3. Links to resources
 
-## Flowchart of Employment Complaints (aka Cases)
-![flowchart](/assets/images/flowchart.png)
+## Flowchart of DFEH Employment Cases
+![flowchart]([/assets/images/flowchart.png](https://github.com/yx1441/Discrimination_Reporting/blob/fe1aee5cf619c811acd7601256f6f1ed8b22bc51/flowchart.png))
 
 
 ## How to run
