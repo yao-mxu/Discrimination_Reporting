@@ -5,16 +5,16 @@
 
 # library(shiny)
 # RUN FROM REPO
-# shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
+shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
 # options(shiny.error = function() {
 #   stop("An error has occurred")
 # })
 
-requiredpkgs <- c("shiny", "tidyverse","devtools","readtext","janitor","cowplot",
-                  "ggplot2","reshape2","data.table","openxlsx","rlang","ggpubr",
-                  "leaflet","dplyr","corrplot")
-newpkgs <- requiredpkgs[!(requiredpkgs %in% installed.packages()[,"Package"])]
-if(length(newpkgs) > 0) {install.packages(newpkgs, dependencies = TRUE) print(paste0("The following package was installed:", newpkgs)) } else if (length(newpkgs) == 0) {print("All packages were already installed previously")}
+#requiredpkgs <- c("shiny", "tidyverse","devtools","readtext","janitor","cowplot",
+#                  "ggplot2","reshape2","data.table","openxlsx","rlang","ggpubr",
+#                  "leaflet","dplyr","corrplot")
+#newpkgs <- requiredpkgs[!(requiredpkgs %in% installed.packages()[,"Package"])]
+#if(length(newpkgs) > 0) {install.packages(newpkgs, dependencies = TRUE) print(paste0("The following package was installed:", newpkgs)) } else if (length(newpkgs) == 0) {print("All packages were already installed previously")}
 
 # LOAD PACKAGES ----------------------
 library(shiny);library(tidyverse);library(devtools);library(readtext);library(janitor);library(cowplot)
