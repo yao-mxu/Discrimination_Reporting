@@ -11,8 +11,8 @@
 # })
 
 requiredpkgs <- c("shiny", "tidyverse","devtools","readtext","janitor","cowplot",
-                  "ggplot2","reshape2","data.table","openxlsx","rlang","ggpubr",
-                  "leaflet","dplyr","corrplot")
+                      "ggplot2","reshape2","data.table","openxlsx","rlang","ggpubr",
+                      "leaflet","dplyr","corrplot")
 newpkgs <- requiredpkgs[!(requiredpkgs %in% installed.packages()[,"Package"])]
 if(length(newpkgs) > 0) {install.packages(newpkgs, dependencies = TRUE) print(paste0("The following package was installed:", newpkgs)) } else if (length(newpkgs) == 0) {print("All packages were already installed previously")}
 
@@ -53,22 +53,22 @@ dat_rts_1518<-subset(dat_rts[dat_rts$record_type=="Right to Sue",])
 
 # 20 counts
 get_cooccurences<-function(reporting_test,ba_or_har){
-    c <- reporting_test %>% rowwise() %>% mutate(sum = sum(across(starts_with(ba_or_har)), na.rm = T))
-    num_co<-data.frame(count=seq(1:21)-1)
-    for (i in 1:length(colnames(c)[str_detect(colnames(c),ba_or_har)])){
-        data<-NULL
-        data<-data.frame(table(c$sum[c[[colnames(c)[str_detect(colnames(c),ba_or_har)][i]]]==1]-1))
-        if (nrow(data.frame(table(c$sum[c[[colnames(c)[str_detect(colnames(c),ba_or_har)][i]]]==1])))!=0){
-            colnames(data)<-c("count",colnames(c)[str_detect(colnames(c),ba_or_har)][i])
-            data[[paste0(colnames(c)[str_detect(colnames(c),ba_or_har)][i],"_pct")]]<-data[[colnames(c)[str_detect(colnames(c),ba_or_har)][i]]]/sum(c[[colnames(c)[str_detect(colnames(c),ba_or_har)][i]]])
-            num_co<-merge(num_co,data,by=c("count"),all.x=T) 
-        }
+  c <- reporting_test %>% rowwise() %>% mutate(sum = sum(across(starts_with(ba_or_har)), na.rm = T))
+  num_co<-data.frame(count=seq(1:21)-1)
+  for (i in 1:length(colnames(c)[str_detect(colnames(c),ba_or_har)])){
+    data<-NULL
+    data<-data.frame(table(c$sum[c[[colnames(c)[str_detect(colnames(c),ba_or_har)][i]]]==1]-1))
+    if (nrow(data.frame(table(c$sum[c[[colnames(c)[str_detect(colnames(c),ba_or_har)][i]]]==1])))!=0){
+      colnames(data)<-c("count",colnames(c)[str_detect(colnames(c),ba_or_har)][i])
+      data[[paste0(colnames(c)[str_detect(colnames(c),ba_or_har)][i],"_pct")]]<-data[[colnames(c)[str_detect(colnames(c),ba_or_har)][i]]]/sum(c[[colnames(c)[str_detect(colnames(c),ba_or_har)][i]]])
+      num_co<-merge(num_co,data,by=c("count"),all.x=T) 
     }
-    
-    num_co[,colnames(num_co)[!str_detect(colnames(num_co), "pct")]]<-sapply(num_co[,colnames(num_co)[!str_detect(colnames(num_co), "pct")]],as.integer)
-    num_co[,colnames(num_co)[str_detect(colnames(num_co), "pct")]]<-sapply(num_co[,colnames(num_co)[str_detect(colnames(num_co), "pct")]],make_pct)
-    num_co<-num_co %>% mutate(across(where(is.numeric), ~ round(., 3)))
-    return(num_co)
+  }
+
+  num_co[,colnames(num_co)[!str_detect(colnames(num_co), "pct")]]<-sapply(num_co[,colnames(num_co)[!str_detect(colnames(num_co), "pct")]],as.integer)
+  num_co[,colnames(num_co)[str_detect(colnames(num_co), "pct")]]<-sapply(num_co[,colnames(num_co)[str_detect(colnames(num_co), "pct")]],make_pct)
+  num_co<-num_co %>% mutate(across(where(is.numeric), ~ round(., 3)))
+  return(num_co)
 }
 
 full_cooc_ba<-get_cooccurences(reporting_test,"ba_")
@@ -267,12 +267,6 @@ corrplot2 <- function(data,method = "pearson",sig.level = 0.05, order = "origina
     )
 }
 
-dat <- data.frame(t = seq(0, 2*pi, by = 0.01))
-x <-  function(t) 16 * sin(t)^3
-y <- function(t) 13*cos(t) - 5*cos(2*t) - 2*cos(3*t) - cos(4*t)
-dat$y <- y(dat$t)
-dat$x <- x(dat$t)
-
 # UI  --------------
 ui <- fluidPage(
     navbarPage("Employment Discrimination Reporting",
@@ -392,28 +386,28 @@ ui <- fluidPage(
                ),
                tabPanel("Co-occurences",
                         tabsetPanel(
-                            tabPanel("Bases", br(),
-                                     selectInput("ba_cooc","Select bases to see co-occurence counts and percentages", ba_all, multiple = TRUE, width = "75%"),
-                                     #selectInput("year_co", "Select which years to visualize", choices = year_choice),
-                                     radioButtons(
-                                         "complaint_type_cooc", "Select a case type: ", 
-                                         choices = c_type, 
-                                         inline = TRUE),
-                                     dataTableOutput(outputId = "ic_table_ba")),
-                            
-                            tabPanel("Harms", br(), 
-                                     # HIDING ERROR MESSAGES AT THE BEGINNING
-                                     tags$style(type="text/css",
-                                                ".shiny-output-error { visibility: hidden; }",
-                                                ".shiny-output-error:before { visibility: hidden; }"),
-                                     
-                                     selectInput("har_cooc","Select harms to see co-occurence counts and percentages",har_all, multiple = TRUE, width = "75%"),
-                                     #selectInput("year_cor2", "Select which years to visualize", choices = year_choice),
-                                     radioButtons(
-                                         "complaint_type_cooc2", "Select a case type: ", 
-                                         choices = c_type, 
-                                         inline = TRUE),
-                                     dataTableOutput(outputId = "ic_table_har")),
+                          tabPanel("Bases", br(),
+                                   selectInput("ba_cooc","Select bases to see co-occurence counts and percentages", ba_all, multiple = TRUE, width = "75%"),
+                                   #selectInput("year_co", "Select which years to visualize", choices = year_choice),
+                                   radioButtons(
+                                     "complaint_type_cooc", "Select a case type: ", 
+                                     choices = c_type, 
+                                     inline = TRUE),
+                                   dataTableOutput(outputId = "ic_table_ba")),
+                          
+                          tabPanel("Harms", br(), 
+                                   # HIDING ERROR MESSAGES AT THE BEGINNING
+                                   tags$style(type="text/css",
+                                              ".shiny-output-error { visibility: hidden; }",
+                                              ".shiny-output-error:before { visibility: hidden; }"),
+                                   
+                                   selectInput("har_cooc","Select harms to see co-occurence counts and percentages",har_all, multiple = TRUE, width = "75%"),
+                                   #selectInput("year_cor2", "Select which years to visualize", choices = year_choice),
+                                   radioButtons(
+                                     "complaint_type_cooc2", "Select a case type: ", 
+                                     choices = c_type, 
+                                     inline = TRUE),
+                                   dataTableOutput(outputId = "ic_table_har")),
                         )
                ),
                tabPanel("Fun",
@@ -439,3 +433,202 @@ ui <- fluidPage(
                ),
                #mainPanel(plotOutput("distPlot")),
     ))
+
+
+dat <- data.frame(t = seq(0, 2*pi, by = 0.01))
+x <-  function(t) 16 * sin(t)^3
+y <- function(t) 13*cos(t) - 5*cos(2*t) - 2*cos(3*t) - cos(4*t)
+dat$y <- y(dat$t)
+dat$x <- x(dat$t)
+
+# plotOutput(outputId = "bacorPlot", width = "100%")
+# SERVER  --------------
+server <- function(input, output, session) {
+    output$heart<- renderPlot({ 
+      ggplot(dat, aes(x,y)) +geom_polygon(fill = rgb(input$color,input$color2,0.4,0.3)) +theme_classic()+xlab("")+ylab("")
+    })
+    #output$sum_table <- renderDataTable({reporting_test})
+    output$cocorPlot<- renderPlot({ 
+        corrplot2(data=reporting_test[,c(input$ba_cor2,input$har_cor2)], order = "original", diag = FALSE, type = "upper")
+    })
+    output$bacorPlot <- renderPlot({
+        if (input$complaint_type_cor=="Full"){
+            if (input$year_cor=="2014-2019"){
+                corrplot2(data=reporting_test[,input$ba_cor], order = "original", diag = FALSE, type = "upper") 
+            }
+            else{
+                corrplot2(data=reporting_test_1518[,input$ba_cor], order = "original", diag = FALSE, type = "upper") 
+            }
+        }
+        else if(input$complaint_type_cor=="Complaint Only"){
+            if (input$year_cor=="2014-2019"){
+                corrplot2(data=dat_empl[,input$ba_cor], order = "original", diag = FALSE, type = "upper")
+            }
+            else{
+                corrplot2(data=dat_empl_1518[,input$ba_cor], order = "original", diag = FALSE, type = "upper") 
+            }
+        }
+        else if(input$complaint_type_cor=="Right to Sue Only"){
+            if (input$year_cor=="2014-2019"){
+                corrplot2(data=dat_rts[,input$ba_cor], order = "original", diag = FALSE, type = "upper")
+            }
+            else{
+                corrplot2(data=dat_rts_1518[,input$ba_cor], order = "original", diag = FALSE, type = "upper")
+            }
+        }
+    })
+    output$harcorPlot <- renderPlot({
+        if (input$complaint_type_cor2=="Full"){
+            if (input$year_cor2=="2014-2019"){
+                corrplot2(data=reporting_test[,input$har_cor],order = "original", diag = FALSE, type = "upper") 
+            }else{
+                corrplot2(data=reporting_test_1518[,input$har_cor], order = "original", diag = FALSE, type = "upper") 
+            }
+        }
+        else if(input$complaint_type_cor2=="Complaint Only"){
+            if (input$year_cor2=="2014-2019"){
+                corrplot2(data=dat_empl[,input$har_cor], order = "original", diag = FALSE, type = "upper")
+            }else{
+                corrplot2(data=dat_empl_1518[,input$har_cor], order = "original", diag = FALSE, type = "upper") 
+            }
+        }
+        else if(input$complaint_type_cor2=="Right to Sue Only"){
+            if (input$year_cor2=="2014-2019"){
+                corrplot2(data=dat_rts[,input$har_cor], order = "original", diag = FALSE, type = "upper")
+            }else{
+                corrplot2(data=dat_rts_1518[,input$har_cor], order = "original", diag = FALSE, type = "upper")
+            }
+        }
+    })
+    output$tab1_text <- renderText({"Employment complaints filed by law in 2017 is 4,346; 2018 4,216 (DFEH, 2017, p.9)
+        15,832 FOR 2016, PAGE 8 (Of the total complaints received by the Department, 17,041 complaints were formally filed by DFEH in 2016. 
+        This number includes 12,242 employment complaints filed along with a request for an immediate Right to Sue letter
+        and 4,799 complaints filed as the result of an intake interview conducted by a DFEH investigator.); 2015: PAGE 7 COMPLAINTS RECEIVED 
+        Total Employment Complaints Received by Basis in 2015 = 20,505; 2014: In 2014, a total of 17,632 employment and 1,524 housing complaints were filed on the bases shown on the following page."})
+    
+    # Outputting the harms co oc table
+      output$ic_table_har <- renderDataTable({
+      if (input$complaint_type_cooc2=="Full"){
+        check2<-NULL
+        for (i in 1:length(input$har_cooc)){
+          check2[[i]]<-full_cooc_har[,colnames(full_cooc_har)[str_detect(colnames(full_cooc_har),input$har_cooc[i])]]
+        }
+        cbind(count=full_cooc_har[,1],do.call(cbind,check2))
+      }
+      else if (input$complaint_type_cooc2=="Complaint Only"){
+        check2<-NULL
+        for (i in 1:length(input$har_cooc)){
+          check2[[i]]<-empl_cooc_har[,colnames(empl_cooc_har)[str_detect(colnames(empl_cooc_har),input$har_cooc[i])]]
+        }
+        cbind(count=empl_cooc_har[,1],do.call(cbind,check2))
+      }
+      else if (input$complaint_type_cooc2=="Right to Sue Only") {
+        check2<-NULL
+        for (i in 1:length(input$har_cooc)){
+          check2[[i]]<-rts_cooc_har[,colnames(rts_cooc_har)[str_detect(colnames(rts_cooc_har),input$har_cooc[i])]]
+        }
+        cbind(count=rts_cooc_har[,1],do.call(cbind,check2))
+      }
+      # colnames(num_co)[str_detect(colnames(num_co),input$ba_cor3)
+    })
+    # Reactive UI for when complaint is selected!!
+    observeEvent(input$complaint_type_cooc, {
+      if (input$complaint_type_cooc=="Complaint Only"){
+        updateSelectInput(session, "ba_cooc",label ="Select bases to see co-occurence counts and percentages", ba_all_noUnknown)
+        }}) 
+    observeEvent(input$complaint_type_cooc, {
+      if (input$complaint_type_cooc!="Complaint Only"){
+        updateSelectInput(session, "ba_cooc",label ="Select bases to see co-occurence counts and percentages", ba_all)
+      }})  
+    
+    # Outputting the basis co oc table
+    output$ic_table_ba <- renderDataTable({
+      if (input$complaint_type_cooc=="Full"){
+        check2<-NULL
+        for (i in 1:length(input$ba_cooc)){
+          check2[[i]]<-full_cooc_ba[,colnames(full_cooc_ba)[str_detect(colnames(full_cooc_ba),input$ba_cooc[i])]]
+        }
+        cbind(count=full_cooc_ba[,1],do.call(cbind,check2))
+      }
+      else if (input$complaint_type_cooc=="Complaint Only"){
+        check2<-NULL
+        for (i in 1:length(input$ba_cooc)){
+          check2[[i]]<-empl_cooc_ba[,colnames(empl_cooc_ba)[str_detect(colnames(empl_cooc_ba),input$ba_cooc[i])]]
+        }
+        cbind(count=empl_cooc_ba[,1],do.call(cbind,check2))
+      }
+      else if (input$complaint_type_cooc=="Right to Sue Only") {
+        check2<-NULL
+        for (i in 1:length(input$ba_cooc)){
+          check2[[i]]<-rts_cooc_ba[,colnames(rts_cooc_ba)[str_detect(colnames(rts_cooc_ba),input$ba_cooc[i])]]
+        }
+        cbind(count=rts_cooc_ba[,1],do.call(cbind,check2))
+      }
+        # colnames(num_co)[str_detect(colnames(num_co),input$ba_cor3)
+    })
+    output$OPlot <- renderPlot({
+        if (input$year_o=="2014-2019"){
+            overall_time_series(year_full, input$record_type2, input$time_unit)
+        }
+        else if (input$year_o=="2015-2018"){
+            overall_time_series(year_4, input$record_type2, input$time_unit)
+        }
+    })
+    output$basisPlot <- renderPlot({
+        if (input$complaint_type=="Full"){
+            if (input$year=="2014-2019"){
+                time_series(reporting_test, input$basis,year_full,input$y_axis,"Basis")
+            }
+            else {
+                time_series(reporting_test, input$basis,year_4,input$y_axis,"Basis")
+            }
+        }
+        else if (input$complaint_type=="Complaint Only"){
+            if (input$year=="2014-2019"){
+                time_series(reporting_test[reporting_test$record_type=="Employment",], input$basis,year_full,input$y_axis,"Basis")
+            }
+            else {
+                time_series(reporting_test[reporting_test$record_type=="Employment",], input$basis,year_4,input$y_axis,"Basis")
+            }
+        }
+        else if (input$complaint_type=="Right to Sue Only"){
+            if (input$year=="2014-2019"){
+                time_series(reporting_test[reporting_test$record_type=="Right to Sue",], input$basis,year_full,input$y_axis,"Basis")
+            }
+            else {
+                time_series(reporting_test[reporting_test$record_type=="Right to Sue",], input$basis,year_4,input$y_axis,"Basis")
+            }
+        }
+    })
+    output$harmPlot <- renderPlot({
+        if (input$complaint_type2=="Full"){
+            if (input$year2=="2014-2019"){
+                time_series(reporting_test, input$harm,year_full,input$y_axis2,"Harm")
+            }
+            else {
+                time_series(reporting_test, input$harm,year_4,input$y_axis2, "Harm")
+            }
+        }
+        else if (input$complaint_type2=="Complaint Only"){
+            if (input$year2=="2014-2019"){
+                time_series(reporting_test[reporting_test$record_type=="Employment",],input$harm,year_full,input$y_axis2,"Harm")
+            }
+            else {
+                time_series(reporting_test[reporting_test$record_type=="Employment",],input$harm,year_4,input$y_axis2, "Harm")
+            } 
+        }
+        else if (input$complaint_type2=="Right to Sue Only"){
+            if (input$year2=="2014-2019"){
+                time_series(reporting_test[reporting_test$record_type=="Right to Sue",],input$harm,year_full,input$y_axis2,"Harm")
+            }
+            else {
+                time_series(reporting_test[reporting_test$record_type=="Right to Sue",],input$harm,year_4,input$y_axis2, "Harm")
+            } 
+        }
+    })
+    
+}
+
+# RUN FROM LOCAL----------------
+shinyApp(ui = ui, server = server)
+# runApp("app.R")
