@@ -287,7 +287,7 @@ ui <- fluidPage(
                                 br(),
                                 # img(src = "flowchart.png", height = 200, width = 200),
                                 br(),
-                                "Note: running from Github may take 7-8 minutes "
+                                "Note: running from Github may take 10-15 minutes "
                                 # span("RStudio", style = "color:blue")
                             ),
                             mainPanel(
