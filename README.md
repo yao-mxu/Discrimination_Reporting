@@ -39,7 +39,7 @@ Table
 
 Note: Removed 1 rows containing missing values (position_stack). occurs when calculating percentages for 2014/11 "Autocorrelation Plots", substantively fine
 
-**Slow if running from Github**
+**Slow**
 
 
 Monday May 16th:
