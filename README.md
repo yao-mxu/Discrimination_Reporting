@@ -14,7 +14,20 @@ Running this application from Github:
 
 ```
 shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
-```                               
+```      
+
+Running this application from local:
+```
+shiny::shinyApp(ui = ui, server = server)
+```  
+Alternatively, hitting 
+"Run App" or type in 
+```
+runApp("app.R")
+```  
+
+**Note: starting up the applicaiton may take around 10 minutes**
+
 ## Notes
 
 Bases,
