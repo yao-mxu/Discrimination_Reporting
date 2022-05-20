@@ -3,6 +3,8 @@
 
 Hosting interactive descriptives for Meeting on May 23rd, 2022.
 
+## Notes
+
 Bases,
 Harms,
 Time Series Plots,
