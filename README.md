@@ -10,7 +10,8 @@ Features of this application:
 3. Links to resources
 
 ## Flowchart of Employment Complaints (aka Cases)
-/assets/images/flowchart.png
+![flowchart](/assets/images/flowchart.png)
+
 
 ## How to run
 Running this application from Github:
