@@ -3,6 +3,12 @@
 
 Hosting interactive descriptives for Meeting on May 23rd, 2022.
 
+Features of this application:
+
+1. Time series figures by bases/harms, record type, year range, and by count/percentage
+2. Correlation matrices and co-occurence counts tables by bases/harms, record type, and year range 
+3. Links to resources
+                                
 ## Notes
 
 Bases,
