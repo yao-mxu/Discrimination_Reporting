@@ -23,7 +23,7 @@ library(leaflet);library(dplyr);library(corrplot)
 make_pct<-function(x){x<-x*100}
 
 # PREPARATION----------------------
-githubURL<-"https://github.com/yao-mxu/Discrimination_Reporting/blob/91c32a644ab7fcaac48a99baf8a3d57e013c65f1/reporting_test_20220628.RData"
+githubURL<-"https://github.com/yao-mxu/Discrimination_Reporting/blob/917989a369380a18d2bd060a97f152a248503f25/reporting_test_20220628.RData?raw=true"
 load(url(githubURL))
 reporting_test<- reporting_test %>% dplyr::mutate(record_type2=case_when(reporting_test$record_type=="Employment" ~ "Complaint Only",
                                                                          reporting_test$record_type=="Right to Sue" ~ "Right to Sue Only"))
