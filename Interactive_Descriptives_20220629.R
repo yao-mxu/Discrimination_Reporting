@@ -5,7 +5,7 @@
 
 library(shiny)
 # RUN FROM REPO
-# shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
+# shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yao-mxu')
 # options(shiny.error = function() {
 #   stop("An error has occurred")
 # })
@@ -21,8 +21,9 @@ library(shiny);library(tidyverse);library(devtools);library(readtext);library(ja
 library(ggplot2);library(reshape2);library(data.table);library(openxlsx);library(rlang);library(ggpubr)
 library(leaflet);library(dplyr);library(corrplot)
 make_pct<-function(x){x<-x*100}
+
 # PREPARATION----------------------
-githubURL<-"https://github.com/yx1441/Discrimination_Reporting/blob/32862e023bc5a74444680df80720b9ab8c82d659/reporting_test_20220512.RData?raw=true"
+githubURL<-"https://github.com/yao-mxu/Discrimination_Reporting/blob/91c32a644ab7fcaac48a99baf8a3d57e013c65f1/reporting_test_20220628.RData"
 load(url(githubURL))
 reporting_test<- reporting_test %>% dplyr::mutate(record_type2=case_when(reporting_test$record_type=="Employment" ~ "Complaint Only",
                                                                          reporting_test$record_type=="Right to Sue" ~ "Right to Sue Only"))
@@ -38,19 +39,24 @@ reporting_test<-reporting_test %>% dplyr::rename(har_denied_envir_free_of_discri
 ba_all <-colnames(reporting_test)[str_detect(colnames(reporting_test),"ba_")]
 ba_all_noUnknown<-ba_all[!str_detect(ba_all,"unknown")]
 har_all <-colnames(reporting_test)[str_detect(colnames(reporting_test),"har_")]
+cr_all <-colnames(reporting_test)[str_detect(colnames(reporting_test),"cr_")]
+cr_all<-cr_all[!str_detect(cr_all,"cr_new")]
+
+
 y_axis<-c("Percentage","Count")
 c_type<-c("Full","Complaint Only","Right to Sue Only")
 unit_choice<-c("By ISO weeks","By months", "By quarters", "By years")
 year_full<-c(2014:2019)
 year_4<-c(2015:2018)
 year_choice<-c("2015-2018","2014-2019")
+
 dat_empl<-subset(reporting_test[reporting_test$record_type=="Employment",])
 dat_rts<-subset(reporting_test[reporting_test$record_type=="Right to Sue",])
 reporting_test_1518<-reporting_test[reporting_test$complaint_year %in% c(2015:2018),]
 dat_empl_1518<-subset(dat_empl[dat_empl$record_type=="Employment",])
 dat_rts_1518<-subset(dat_rts[dat_rts$record_type=="Right to Sue",])
 
-
+# FUNCTIONS --------------
 # 20 counts
 get_cooccurences<-function(reporting_test,ba_or_har){
   c <- reporting_test %>% rowwise() %>% mutate(sum = sum(across(starts_with(ba_or_har)), na.rm = T))
@@ -79,28 +85,6 @@ full_cooc_har<-get_cooccurences(reporting_test,"har_")
 empl_cooc_har<-get_cooccurences(reporting_test[reporting_test$record_type=="Employment",],"har_")
 rts_cooc_har<-get_cooccurences(reporting_test[reporting_test$record_type=="Right to Sue",],"har_")
 
-
-# Check data inconsistencies w.r.t. annual reports from DFEH
-nrow(reporting_test[reporting_test$complaint_year==2014&reporting_test$record_type=="Employment",])
-nrow(reporting_test[reporting_test$complaint_year==2015&reporting_test$record_type=="Employment",])
-nrow(reporting_test[reporting_test$complaint_year==2016&reporting_test$record_type=="Employment",])
-nrow(reporting_test[reporting_test$complaint_year==2017&reporting_test$record_type=="Employment",])
-nrow(reporting_test[reporting_test$complaint_year==2018&reporting_test$record_type=="Employment",])
-nrow(reporting_test[reporting_test$complaint_year==2019&reporting_test$record_type=="Employment",])
-
-nrow(reporting_test[reporting_test$complaint_year==2014&reporting_test$record_type=="Right to Sue",])
-nrow(reporting_test[reporting_test$complaint_year==2015&reporting_test$record_type=="Right to Sue",])
-nrow(reporting_test[reporting_test$complaint_year==2016&reporting_test$record_type=="Right to Sue",])
-nrow(reporting_test[reporting_test$complaint_year==2017&reporting_test$record_type=="Right to Sue",])
-nrow(reporting_test[reporting_test$complaint_year==2018&reporting_test$record_type=="Right to Sue",])
-nrow(reporting_test[reporting_test$complaint_year==2019&reporting_test$record_type=="Right to Sue",])
-
-
-
-nrow(reporting_test[reporting_test$complaint_year==2015,])
-
-
-# FUNCTIONS --------------
 time_series<-function(reporting_test, ba_category, year, y_axis, harmorbasis){
     if (harmorbasis=="Basis"){
         if (y_axis=="Percentage"){
@@ -151,7 +135,32 @@ time_series<-function(reporting_test, ba_category, year, y_axis, harmorbasis){
                 panel.background = element_blank(),
                 axis.line = element_line(colour = "black"))+ labs(fill = "Complaint Year")+ylim(0,1200)
         }}
+  else if (harmorbasis=="CloseReason"){
+    if (y_axis=="Percentage"){
+      see<-reporting_test[reporting_test$complaint_year %in% year,] %>% group_by(mth_case_file_date_new) %>%  mutate(percentage_month = mean(eval(parse(text=ba_category)))*100) %>% select(mth_case_file_date_new, percentage_month, complaint_year)%>% distinct()
+      ggplot(see, aes(x=mth_case_file_date_new,y=percentage_month,fill=complaint_year)) + geom_bar(stat="identity")+xlab("Months")+ylab(paste0("Cases Filed by Percentage")) +theme(#panel.grid.major = element_blank(),
+        axis.text.x=element_text(angle = 40, hjust=0.5,vjust=0.5,size = rel(1)),
+        axis.title.x=element_text(hjust=0.5,vjust=0.5,size = rel(0.9)),
+        axis.text.y=element_text(hjust=0.5,vjust=0.5,size = rel(1)),
+        legend.position  = "right",
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"))+ylim(0,100)+ labs(fill = "Complaint Year")
+      # +theme(axis.text.x = element_text(angle = 90,size=6, vjust = 0.5, hjust=1))
+      
+    }
+    else {
+      ggplot(reporting_test[reporting_test$complaint_year %in% year,], aes(y=eval(parse(text=ba_category)),x=mth_case_file_date_new,fill=complaint_year)) + geom_bar(stat="identity")+ylab(paste0("Cases Filed by Count"))+xlab("By Months") +theme(#panel.grid.major = element_blank(),
+        axis.text.x=element_text(angle = 40,hjust=0.5,vjust=0.5,size = rel(1)),
+        axis.title.x=element_text(hjust=0.5,vjust=0.5,size = rel(0.9)),
+        axis.text.y=element_text(hjust=0.5,vjust=0.5,size = rel(1)),
+        legend.position  = "right",
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"))+ labs(fill = "Complaint Year")+ylim(0,1700)
+    }}
 }
+
 overall_time_series<-function(year, record_type2, time_unit){
     if (time_unit=="By quarters"){
         if (record_type2=="Full"){
@@ -247,6 +256,7 @@ overall_time_series<-function(year, record_type2, time_unit){
         }
     }
 }
+
 corrplot2 <- function(data,method = "pearson",sig.level = 0.05, order = "original",diag = FALSE, type = "upper",tl.srt = 90,number.font = 1,number.cex = 1,mar = c(0, 0, 0, 0)) {
     mat <- cor(data, method = method,use = "complete.obs")
     cor.mtest <- function(mat, method) {
@@ -361,6 +371,20 @@ ui <- fluidPage(
                                          inline = TRUE),
                                      plotOutput(outputId = "harmPlot")
                             ),
+                            tabPanel("Close Reasons", br(),
+                                     selectInput("cr", "Select a close reason", choices = cr_all, width = "50%"),
+                                     selectInput("year3", "Select a year range", choices = year_choice),
+                                     radioButtons(
+                                       "complaint_type3", "Select a case type: ", 
+                                       choices = c_type, 
+                                       inline = TRUE),
+                                     radioButtons(
+                                       "y_axis3", "y axis: ", 
+                                       choices = rev(y_axis),
+                                       inline = TRUE),
+                                     p("Note that the filed complaints may be closed with the issuance of Right to Sue, though it is not reflected in the data."),
+                                     plotOutput(outputId = "crPlot")
+                            ),
                         ),
                ),
                tabPanel("Correlations",
@@ -457,6 +481,9 @@ dat$x <- x(dat$t)
 # plotOutput(outputId = "bacorPlot", width = "100%")
 # SERVER  --------------
 server <- function(input, output, session) {
+  output$cr_text<-renderPrint({
+    "Note that the filed complaints may be closed with the issuance of Right to Sue, though it is not reflected in the data."
+  })
     output$heart<- renderPlot({ 
       ggplot(dat, aes(x,y)) +geom_polygon(fill = rgb(input$color,input$color2,0.4,0.3)) +theme_classic()+xlab("")+ylab("")
     })
@@ -638,6 +665,32 @@ server <- function(input, output, session) {
                 time_series(reporting_test[reporting_test$record_type=="Right to Sue",],input$harm,year_4,input$y_axis2, "Harm")
             } 
         }
+    })
+    output$crPlot <- renderPlot({
+      if (input$complaint_type3=="Full"){
+        if (input$year3=="2014-2019"){
+          time_series(reporting_test, input$cr,year_full,input$y_axis3,"CloseReason")
+        }
+        else {
+          time_series(reporting_test, input$cr,year_4,input$y_axis3,"CloseReason")
+        }
+      }
+      else if (input$complaint_type3=="Complaint Only"){
+        if (input$year=="2014-2019"){
+          time_series(reporting_test[reporting_test$record_type=="Employment",], input$cr,year_full,input$y_axis3,"CloseReason")
+        }
+        else {
+          time_series(reporting_test[reporting_test$record_type=="Employment",], input$cr,year_4,input$y_axis3,"CloseReason")
+        }
+      }
+      else if (input$complaint_type3=="Right to Sue Only"){
+        if (input$year=="2014-2019"){
+          time_series(reporting_test[reporting_test$record_type=="Right to Sue",], input$cr,year_full,input$y_axis3,"CloseReason")
+        }
+        else {
+          time_series(reporting_test[reporting_test$record_type=="Right to Sue",], input$cr,year_4,input$y_axis3,"CloseReason")
+        }
+      }
     })
     
 }
