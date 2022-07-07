@@ -6,9 +6,7 @@
 library(shiny)
 # RUN FROM REPO
 # shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yao-mxu')
-# options(shiny.error = function() {
-#   stop("An error has occurred")
-# })
+
 
 requiredpkgs <- c("shiny", "tidyverse","devtools","readtext","janitor","cowplot",
                       "ggplot2","reshape2","data.table","openxlsx","rlang","ggpubr",
