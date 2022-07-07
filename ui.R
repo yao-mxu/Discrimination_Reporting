@@ -1,7 +1,7 @@
 # Yao Xu
 # Discrimination Reporting
 # Interactive Descriptives
-# 6/29/22
+# 7/6/22
 
 library(shiny)
 # RUN FROM REPO
@@ -59,7 +59,7 @@ dat_rts_1518<-subset(dat_rts[dat_rts$record_type=="Right to Sue",])
 # FUNCTIONS --------------
 # 20 counts
 get_cooccurences<-function(reporting_test,ba_or_har){
-  c <- reporting_test %>% rowwise() %>% mutate(sum = sum(across(starts_with(ba_or_har)), na.rm = T))
+  c <- reporting_test %>% rowwise() %>% dplyr::mutate(sum = sum(across(starts_with(ba_or_har)), na.rm = T))
   num_co<-data.frame(count=seq(1:21)-1)
   for (i in 1:length(colnames(c)[str_detect(colnames(c),ba_or_har)])){
     data<-NULL
@@ -73,7 +73,7 @@ get_cooccurences<-function(reporting_test,ba_or_har){
   
   num_co[,colnames(num_co)[!str_detect(colnames(num_co), "pct")]]<-sapply(num_co[,colnames(num_co)[!str_detect(colnames(num_co), "pct")]],as.integer)
   num_co[,colnames(num_co)[str_detect(colnames(num_co), "pct")]]<-sapply(num_co[,colnames(num_co)[str_detect(colnames(num_co), "pct")]],make_pct)
-  num_co<-num_co %>% mutate(across(where(is.numeric), ~ round(., 3)))
+  num_co<-num_co %>% dplyr::mutate(across(where(is.numeric), ~ round(., 3)))
   return(num_co)
 }
 
@@ -85,10 +85,12 @@ full_cooc_har<-get_cooccurences(reporting_test,"har_")
 empl_cooc_har<-get_cooccurences(reporting_test[reporting_test$record_type=="Employment",],"har_")
 rts_cooc_har<-get_cooccurences(reporting_test[reporting_test$record_type=="Right to Sue",],"har_")
 
+time_series(reporting_test, "ba_age", year=c(2015:2018), y_axis="Percentage", harmorbasis="Basis")
+
 time_series<-function(reporting_test, ba_category, year, y_axis, harmorbasis){
   if (harmorbasis=="Basis"){
     if (y_axis=="Percentage"){
-      see<-reporting_test[reporting_test$complaint_year %in% year,] %>% group_by(mth_case_file_date_new) %>%  mutate(percentage_month = mean(eval(parse(text=ba_category)))*100) %>% select(mth_case_file_date_new, percentage_month, complaint_year)%>% distinct()
+      see<-reporting_test[reporting_test$complaint_year %in% year,] %>% group_by(mth_case_file_date_new) %>%  dplyr::mutate(percentage_month = mean(eval(parse(text=ba_category)))*100) %>% dplyr::select(mth_case_file_date_new, percentage_month, complaint_year)%>% distinct()
       ggplot(see, aes(x=mth_case_file_date_new,y=percentage_month,fill=complaint_year)) + geom_bar(stat="identity")+xlab("Months")+ylab(paste0("Cases Filed by Percentage")) +theme(#panel.grid.major = element_blank(),
         axis.text.x=element_text(angle = 40, hjust=0.5,vjust=0.5,size = rel(1)),
         axis.title.x=element_text(hjust=0.5,vjust=0.5,size = rel(0.9)),
@@ -113,7 +115,7 @@ time_series<-function(reporting_test, ba_category, year, y_axis, harmorbasis){
   
   else if (harmorbasis=="Harm"){
     if (y_axis=="Percentage"){
-      see<-reporting_test[reporting_test$complaint_year %in% year,] %>% group_by(mth_case_file_date_new) %>%  mutate(percentage_month = mean(eval(parse(text=ba_category)))*100) %>% select(mth_case_file_date_new, percentage_month, complaint_year)%>% distinct()
+      see<-reporting_test[reporting_test$complaint_year %in% year,] %>% group_by(mth_case_file_date_new) %>%  dplyr::mutate(percentage_month = mean(eval(parse(text=ba_category)))*100) %>% dplyr::select(mth_case_file_date_new, percentage_month, complaint_year)%>% distinct()
       ggplot(see, aes(x=mth_case_file_date_new,y=percentage_month,fill=complaint_year)) + geom_bar(stat="identity")+xlab("Months")+ylab(paste0("Cases Filed by Percentage")) +theme(#panel.grid.major = element_blank(),
         axis.text.x=element_text(angle = 40, hjust=0.5,vjust=0.5,size = rel(1)),
         axis.title.x=element_text(hjust=0.5,vjust=0.5,size = rel(0.9)),
@@ -137,7 +139,7 @@ time_series<-function(reporting_test, ba_category, year, y_axis, harmorbasis){
     }}
   else if (harmorbasis=="CloseReason"){
     if (y_axis=="Percentage"){
-      see<-reporting_test[reporting_test$complaint_year %in% year,] %>% group_by(mth_case_file_date_new) %>%  mutate(percentage_month = mean(eval(parse(text=ba_category)))*100) %>% select(mth_case_file_date_new, percentage_month, complaint_year)%>% distinct()
+      see<-reporting_test[reporting_test$complaint_year %in% year,] %>% group_by(mth_case_file_date_new) %>%  dplyr::mutate(percentage_month = mean(eval(parse(text=ba_category)))*100) %>% dplyr::select(mth_case_file_date_new, percentage_month, complaint_year)%>% distinct()
       ggplot(see, aes(x=mth_case_file_date_new,y=percentage_month,fill=complaint_year)) + geom_bar(stat="identity")+xlab("Months")+ylab(paste0("Cases Filed by Percentage")) +theme(#panel.grid.major = element_blank(),
         axis.text.x=element_text(angle = 40, hjust=0.5,vjust=0.5,size = rel(1)),
         axis.title.x=element_text(hjust=0.5,vjust=0.5,size = rel(0.9)),
@@ -471,3 +473,9 @@ ui <- fluidPage(
              #mainPanel(plotOutput("distPlot")),
   ))
 
+
+dat <- data.frame(t = seq(0, 2*pi, by = 0.01))
+x <-  function(t) 16 * sin(t)^3
+y <- function(t) 13*cos(t) - 5*cos(2*t) - 2*cos(3*t) - cos(4*t)
+dat$y <- y(dat$t)
+dat$x <- x(dat$t)
