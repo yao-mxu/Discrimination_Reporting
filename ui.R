@@ -1,14 +1,11 @@
 # Yao Xu
 # Discrimination Reporting
 # Interactive Descriptives
-# 7/6/22
+# 7/11/22
 
 library(shiny)
 # RUN FROM REPO
 # shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yao-mxu')
-# options(shiny.error = function() {
-#   stop("An error has occurred")
-# })
 
 requiredpkgs <- c("shiny", "tidyverse","devtools","readtext","janitor","cowplot",
                   "ggplot2","reshape2","data.table","openxlsx","rlang","ggpubr",
@@ -328,8 +325,8 @@ ui <- fluidPage(
                               href = "https://github.com/yao-mxu/Discrimination_Reporting")),
                           br(),
                           h3("Features of this application"),
-                          p("- Time series figures by bases/harms, record type, year range, and by count/percentage."),
-                          p("- Correlation matrices and co-occurence counts tables by bases/harms, record type, and year range."),
+                          p("- Time series figures by bases/harms/close reasons, record type, year range, and by count/percentage."),
+                          p("- Correlation matrices and co-occurence counts tables by bases/harms/close reasons, record type, and year range."),
                           p("- Links to resources"),
                         )
                       ),
@@ -358,6 +355,7 @@ ui <- fluidPage(
                                    "y_axis", "y axis: ", 
                                    choices = y_axis, 
                                    inline = TRUE),
+                                 p("Bases organized by overall frequency."),
                                  plotOutput(outputId = "basisPlot")
                         ),
                         tabPanel("Harms", br(),
@@ -371,6 +369,7 @@ ui <- fluidPage(
                                    "y_axis2", "y axis: ", 
                                    choices = y_axis,
                                    inline = TRUE),
+                                 p("Harms organized by overall frequency."),
                                  plotOutput(outputId = "harmPlot")
                         ),
                         tabPanel("Close Reasons", br(),
@@ -384,7 +383,9 @@ ui <- fluidPage(
                                    "y_axis3", "y axis: ", 
                                    choices = rev(y_axis),
                                    inline = TRUE),
-                                 p("Note that the filed complaints may be closed with the issuance of Right to Sue, though it is not reflected in the data."),
+                                 p("Close Reasons organized by overall frequency."),
+                                 p("Note that the filed complaints may be closed with the issuance of a Right to Sue, though it is not reflected in the data. Also note that all Right to Sue cases have been closed by the issuance of a Right to Sue."),
+                                 p("Insufficient Evidence not yet aggregated as an umbrella group to show variations."),
                                  plotOutput(outputId = "crPlot")
                         ),
                       ),
@@ -410,14 +411,15 @@ ui <- fluidPage(
                                    choices = c_type, 
                                    inline = TRUE),
                                  plotOutput(outputId = "harcorPlot", width = "100%")),
-                        tabPanel("Bases and Harms", br(),
+                        tabPanel("Bases/Harms/Close Reasons", br(),
                                  selectInput("ba_cor2","Select bases to create correlation matrices", ba_all, multiple = TRUE, width = "75%"),
                                  selectInput("har_cor2","Select harms to create correlation matrices", har_all, multiple = TRUE, width = "75%"),
-                                 # selectInput("year_cor", "Select which years to visualize", choices = year_choice),
-                                 # radioButtons(
-                                 #     "complaint_type_cor", "Select a case type: ", 
-                                 #     choices = c_type, 
-                                 #    inline = TRUE),
+                                 selectInput("cr_cor2","Select close reasons to create correlation matrices (complaints only)", cr_all, multiple = FALSE, width = "75%"),
+                                 selectInput("year_cocor", "Select which years to visualize", choices = year_choice),
+                                 radioButtons(
+                                   "complaint_type_cocor", "Select a case type: ", 
+                                   choices = c_type, 
+                                   inline = TRUE),
                                  plotOutput(outputId = "cocorPlot", width = "100%")
                         ),
                         

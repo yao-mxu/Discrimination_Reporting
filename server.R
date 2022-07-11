@@ -1,14 +1,11 @@
 # Yao Xu
 # Discrimination Reporting
 # Interactive Descriptives
-# 7/6/22
+# 7/11/22
 
 library(shiny)
 # RUN FROM REPO
 # shiny::runGitHub(repo = 'Discrimination_Reporting',username ='yao-mxu')
-# options(shiny.error = function() {
-#   stop("An error has occurred")
-# })
 
 requiredpkgs <- c("shiny", "tidyverse","devtools","readtext","janitor","cowplot",
                   "ggplot2","reshape2","data.table","openxlsx","rlang","ggpubr",
@@ -297,8 +294,40 @@ server <- function(input, output, session) {
     ggplot(dat, aes(x,y)) +geom_polygon(fill = rgb(input$color,input$color2,0.4,0.3)) +theme_classic()+xlab("")+ylab("")
   })
   #output$sum_table <- renderDataTable({reporting_test})
-  output$cocorPlot<- renderPlot({ 
-    corrplot2(data=reporting_test[,c(input$ba_cor2,input$har_cor2)], order = "original", diag = FALSE, type = "upper")
+  # Reactive UI for when rts is selected in correlation matrix!!
+  observeEvent(input$complaint_type_cocor, {
+    if (input$complaint_type_cocor=="Right to Sue Only"){
+      updateSelectInput(session, "cr_cor2",label ="Select close reasons to create correlation matrices (complaints only)",cr_all[1] )
+    }}) 
+  observeEvent(input$complaint_type_cocor, {
+    if (input$complaint_type_cocor!="Right to Sue Only"){
+      updateSelectInput(session, "cr_cor2",label ="Select close reasons to create correlation matrices (complaints only)", cr_all[-1])
+    }})  
+  output$cocorPlot<- renderPlot({
+    if (input$complaint_type_cocor=="Full"){
+      if (input$year_cocor=="2014-2019"){
+        corrplot2(data=reporting_test[,c(input$ba_cor2,input$har_cor2,input$cr_cor2)], order = "original", diag = FALSE, type = "upper")
+      }
+      else{
+        corrplot2(data=reporting_test_1518[,c(input$ba_cor2,input$har_cor2,input$cr_cor2)], order = "original", diag = FALSE, type = "upper")
+      }
+    }
+    else if(input$complaint_type_cocor=="Complaint Only"){
+      if (input$year_cocor=="2014-2019"){
+        corrplot2(data=dat_empl[,c(input$ba_cor2,input$har_cor2,input$cr_cor2)], order = "original", diag = FALSE, type = "upper")
+      }
+      else{
+        corrplot2(data=dat_empl_1518[,c(input$ba_cor2,input$har_cor2,input$cr_cor2)], order = "original", diag = FALSE, type = "upper")
+      }
+    }
+    else if(input$complaint_type_cocor=="Right to Sue Only"){
+      if (input$year_cocor=="2014-2019"){
+        corrplot2(data=dat_rts[,c(input$ba_cor2,input$har_cor2,input$cr_cor2)], order = "original", diag = FALSE, type = "upper")
+      }
+      else{
+        corrplot2(data=dat_rts_1518[,c(input$ba_cor2,input$har_cor2,input$cr_cor2)], order = "original", diag = FALSE, type = "upper")
+      }
+    }
   })
   output$bacorPlot <- renderPlot({
     if (input$complaint_type_cor=="Full"){
@@ -503,4 +532,5 @@ server <- function(input, output, session) {
   })
   
 }
+
 
