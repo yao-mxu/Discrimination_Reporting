@@ -17,7 +17,7 @@ Features of this application:
 Running this application from Github:
 
 ```
-runGitHub(repo = 'Discrimination_Reporting',username ='yx1441')
+runGitHub(repo = 'Discrimination_Reporting',username ='yao-mxu')
 ```      
 
 Running this application from local:
