@@ -13,21 +13,21 @@ Within estimation:
 4) or group the sample by simple changes (increase, decrease, constant)
 
 Between estimation:
-1) examine the distribution of 2012 census tract level Republican vote share, group the sample by sd (mean+-1sd, 1sd+, 1sd-)
-2) examine the distribution of 2016 census tract level Republican vote share, group the sample by sd (mean+-1sd, 1sd+, 1sd-)
+1) examine the distribution of 2012 census tract level Republican vote share, group the sample by sd (mean+-1sd, 1sd+, 1sd-) or by simple majority
+2) examine the distribution of 2016 census tract level Republican vote share, group the sample by sd (mean+-1sd, 1sd+, 1sd-) or by simple majority
 3) compare group membership change
 
 Either way, little variation, see figures.
 
 Q&A:
 
-> Simple majority in between estimation seems logical?
+> Simple majority in between estimation?
 
-Answer: In 2012 mean =0.32; sd = 0.16; In 2016, mean=0.26; sd = 0.15.
+Answer: We included this, but in 2012 mean =0.32; sd = 0.16; In 2016, mean=0.26; sd = 0.15. See summary tables under the Political tab, too.
 
 > What about finding a "threshold" of change in Republican vote share?
 
-Answer: It won't solve our problem, since the raw changes of increase or decrease did not show enough variation
+Answer: It won't solve our problem, since the raw changes of increase (or decrease) did not show enough variation
 
 
 Note: Missingness in census tract level political variables in either 2012 or 2016 are omitted from the data.
