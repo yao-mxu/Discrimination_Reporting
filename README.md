@@ -1,6 +1,12 @@
 # Discrimination Reporting
 ## Employment Discrimination Reporting in California
 
+
+### Update July 18, 2022
+Note: Missingness in census tract level political variables in either 2012 or 2016 are omitted from the data.
+
+
+
 Hosting interactive descriptives for Meeting on May 23rd, 2022.
 
 Features of this application:
