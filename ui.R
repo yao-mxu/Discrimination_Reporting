@@ -1,7 +1,7 @@
 # Yao Xu
 # Discrimination Reporting
 # Interactive Descriptives
-# 7/11/22
+# 7/18/22
 
 library(shiny)
 # RUN FROM REPO
@@ -20,8 +20,11 @@ library(leaflet);library(dplyr);library(corrplot)
 make_pct<-function(x){x<-x*100}
 
 # PREPARATION----------------------
+
+# load full reporting dt
 githubURL<-"https://github.com/yao-mxu/Discrimination_Reporting/blob/917989a369380a18d2bd060a97f152a248503f25/reporting_test_20220628.RData?raw=true"
 load(url(githubURL))
+
 reporting_test<- reporting_test %>% dplyr::mutate(record_type2=case_when(reporting_test$record_type=="Employment" ~ "Complaint Only",
                                                                          reporting_test$record_type=="Right to Sue" ~ "Right to Sue Only"))
 
@@ -52,6 +55,51 @@ dat_rts<-subset(reporting_test[reporting_test$record_type=="Right to Sue",])
 reporting_test_1518<-reporting_test[reporting_test$complaint_year %in% c(2015:2018),]
 dat_empl_1518<-subset(dat_empl[dat_empl$record_type=="Employment",])
 dat_rts_1518<-subset(dat_rts[dat_rts$record_type=="Right to Sue",])
+
+# load poli reporting dt
+githubURL_poli<-"https://github.com/yao-mxu/Discrimination_Reporting/blob/c9764dbe4e128d5c2983df2deb5c3ffc56b90411/reporting_test_poli_20220625.RData?raw=true"
+load(url(githubURL_poli))
+
+# Subset to only RTS
+reporting_rts<-reporting_test_poli[reporting_test_poli$record_type=="Right to Sue",]
+
+# Look at rep vote percentage difference
+reporting_rts$reppct_ct_12<-reporting_rts$repvote_ct_12/reporting_rts$totalvote_ct_12
+reporting_rts$reppct_ct_16<-reporting_rts$repvote_ct_16/reporting_rts$totalvote_ct_16
+reporting_rts$reppct_diff<-reporting_rts$reppct_ct_16-reporting_rts$reppct_ct_12
+
+reporting_rts$vote12<-ifelse(reporting_rts$reppct_ct_12>0.5, "Republican","Democrat")
+reporting_rts$vote16<-ifelse(reporting_rts$reppct_ct_16>0.5, "Republican","Democrat")
+
+# 1) Between estimation
+# But to ensure we have something to compare with, we can calculate the difference in advance
+# First way: look at Mean +- 1SD; Mean + 1SD; Mean - 1SD
+reporting_rts <- reporting_rts %>% mutate(rep12_sd=case_when(reporting_rts$reppct_ct_12<mean(reporting_rts$reppct_ct_12,na.rm=T)+sd(reporting_rts$reppct_ct_12,na.rm=T)&reporting_rts$reppct_ct_12>mean(reporting_rts$reppct_ct_12,na.rm=T)-sd(reporting_rts$reppct_ct_12,na.rm=T) ~ "repv12_avgn1sd",
+                                                             reporting_rts$reppct_ct_12<mean(reporting_rts$reppct_ct_12,na.rm=T)-sd(reporting_rts$reppct_ct_12,na.rm=T) ~ "repv12_b1sd",
+                                                             reporting_rts$reppct_ct_12>mean(reporting_rts$reppct_ct_12,na.rm=T)+sd(reporting_rts$reppct_ct_12,na.rm=T) ~ "repv12_a1sd"))
+
+
+reporting_rts <- reporting_rts %>% mutate(rep16_sd=case_when(reporting_rts$reppct_ct_16<mean(reporting_rts$reppct_ct_16,na.rm=T)+sd(reporting_rts$reppct_ct_16,na.rm=T)&reporting_rts$reppct_ct_16>mean(reporting_rts$reppct_ct_16,na.rm=T)-sd(reporting_rts$reppct_ct_16,na.rm=T) ~ "repv16_avgn1sd",
+                                                             reporting_rts$reppct_ct_16<mean(reporting_rts$reppct_ct_16,na.rm=T)-sd(reporting_rts$reppct_ct_16,na.rm=T) ~ "repv16_b1sd",
+                                                             reporting_rts$reppct_ct_16>mean(reporting_rts$reppct_ct_16,na.rm=T)+sd(reporting_rts$reppct_ct_16,na.rm=T) ~ "repv16_a1sd"))
+
+reporting_rts <- reporting_rts %>% mutate(repdiff_sim=case_when(reporting_rts$reppct_diff<0 ~ "repv_decr",
+                                                                reporting_rts$reppct_diff>0 ~ "repv_incr",
+                                                                reporting_rts$reppct_diff==0 ~ "repv_const"))
+
+reporting_rts <- reporting_rts %>% mutate(repdiff_sd=case_when(reporting_rts$reppct_diff<mean(reporting_rts$reppct_diff,na.rm=T)-sd(reporting_rts$reppct_diff,na.rm=T) ~ "repv_b1sd",
+                                                               reporting_rts$reppct_diff>mean(reporting_rts$reppct_diff,na.rm=T)+sd(reporting_rts$reppct_diff,na.rm=T) ~ "repv_a1sd",
+                                                               reporting_rts$reppct_diff>mean(reporting_rts$reppct_diff,na.rm=T)-sd(reporting_rts$reppct_diff,na.rm=T)& reporting_rts$reppct_diff<mean(reporting_rts$reppct_diff,na.rm=T)+sd(reporting_rts$reppct_diff,na.rm=T)~ "repv_avgn1sd"))
+
+# Look at distribution
+reporting_rts$repv_csd<-paste0(reporting_rts$rep12_sd,"_",reporting_rts$rep16_sd)
+reporting_rts$rep_c<-paste0(reporting_rts$vote12,"_",reporting_rts$vote16)
+
+# Make Poli table
+poli_table<-distinct(dplyr::select(reporting_rts,c(census_tract,reppct_ct_12,vote12, rep12_sd, reppct_ct_16, vote16, rep16_sd, rep_c, repv_csd, reppct_diff,repdiff_sim,repdiff_sd)))
+
+# See dist rep
+seedist_rep<-c("vote12","vote16","rep_c","rep12_sd","rep16_sd", "repv_csd","repdiff_sim","repdiff_sd")
 
 # FUNCTIONS --------------
 # 20 counts
@@ -451,6 +499,48 @@ ui <- fluidPage(
                                  dataTableOutput(outputId = "ic_table_har")),
                       )
              ),
+             tabPanel("Political",
+                      tabsetPanel(
+                        tabPanel("Census Tract Table", br(), 
+                                 # HIDING ERROR MESSAGES AT THE BEGINNING
+                                 #tags$style(type="text/css",
+                                 #           ".shiny-output-error { visibility: hidden; }",
+                                 #           ".shiny-output-error:before { visibility: hidden; }"),
+                                 #
+                                 #selectInput("har_cooc","Select harms to see co-occurence counts and percentages",har_all, multiple = TRUE, width = "75%"),
+                                 #selectInput("year_cor2", "Select which years to visualize", choices = year_choice),
+                                 #radioButtons(
+                                 #  "complaint_type_cooc2", "Select a case type: ", 
+                                 #  choices = c_type, 
+                                 #  inline = TRUE),
+                                 p("vote12: Republican when Republican vote share in 2012 was greater than 50%, otherwise Democrat"),
+                                 p("vote16: Republican when Republican vote share in 2016 was greater than 50%, otherwise Democrat"),
+                                 p("rep_c: Republican vote share group change from 2012 to 2016, based on vote12 and vote16"),
+                                 p("rep12sd: Republican vote share in 2012 categorized into Mean+-1sd (avgn1sd), Above 1 sd (a1sd), Below 1 sd (b1sd) groups"),
+                                 p("rep16sd: Republican vote share in 2016 categorized into Mean+-1sd (avgn1sd), Above 1 sd (a1sd), Below 1 sd (b1sd) groups"),
+                                 p("repv_csd: Republican vote share group change from 2012 to 2016, based on rep12sd and rep16sd"),
+                                 p("repdiff_sim: Republican vote share change from 2012 to 2016, whether increased, decreased, or stayed the same"),
+                                 p("repdiff_sd: Republican vote share change from 2012 to 2016, whether the change was within Mean+-1sd (avgn1sd), Above 1 sd (a1sd), Below 1 sd (b1sd)."),
+                                 dataTableOutput(outputId = "dt_repv")),
+                        
+                        tabPanel("Distribution Tables", br(),
+                                 #selectInput("ba_cooc","Select bases to see co-occurence counts and percentages", ba_all, multiple = TRUE, width = "75%"),
+                                 selectInput("type_rept", "Select which operationalization you would like to see a summary table for (census tract level, n=5459)", multiple = F, choices = seedist_rep, width = "75%"),
+                                 # selectInput("type_rept", "Select which operationalization to proceed", choices = c("Within","Between")),
+                                 #radioButtons(
+                                 #  "complaint_type_cooc", "Select a case type: ", 
+                                 #  choices = c_type, 
+                                 #  inline = TRUE),
+                                 dataTableOutput(outputId = "freqdt_repv")),
+                        
+                        tabPanel("Figures w/ Case Counts", br(),
+                                 selectInput("type_rept2","Select which operationalization to proceed", c("rep_c","repv_csd","repdiff_sim","repdiff_sd"), multiple = FALSE, width = "75%"),
+                                 selectInput("time_unit_poli", "Select a time unit", choices = unit_choice),
+                                 plotOutput(outputId = "PoliPlot", width = "100%")
+                        ),
+                        
+                      )
+             ),
              tabPanel("Fun",
                       "Throwing in one last figure here:",
                       br(),
@@ -481,3 +571,12 @@ x <-  function(t) 16 * sin(t)^3
 y <- function(t) 13*cos(t) - 5*cos(2*t) - 2*cos(3*t) - cos(4*t)
 dat$y <- y(dat$t)
 dat$x <- x(dat$t)
+
+reporting_rts<-reporting_rts[reporting_rts$complaint_year!=2014,]
+reporting_rts_ct<-reporting_rts %>% group_by_at(c("rep_c","mth_case_file_date_new_num"))%>% count()
+#reporting_rts_ct<-reporting_rts_ct[!str_detect(reporting_rts_ct[[input$type_rept2]],"NA"),]
+ggplot(data = reporting_rts_ct, aes(x = mth_case_file_date_new_num, y=n))+
+  geom_bar(stat="identity")+facet_wrap(~reporting_rts_ct$rep_c)
+
+
+# plotOutput(outputId = "bacorPlot", width = "100%")
