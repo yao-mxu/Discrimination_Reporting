@@ -6,13 +6,13 @@
 
 Two way of theorizing changes in Republican vote share:
 
-Within estimation:
+Within operationalization:
 1) compare the change in vote share within each census tract between 2012 and 2016
 2) examine the distribution of the change in vote share among the census tracts
 3) group the sample by sd (mean+-1sd, 1sd+, 1sd-)
 4) or group the sample by simple changes (increase, decrease, constant)
 
-Between estimation:
+Between operationalization:
 1) examine the distribution of 2012 census tract level Republican vote share, group the sample by sd (mean+-1sd, 1sd+, 1sd-) or by simple majority
 2) examine the distribution of 2016 census tract level Republican vote share, group the sample by sd (mean+-1sd, 1sd+, 1sd-) or by simple majority
 3) compare group membership change
