@@ -1,7 +1,7 @@
 # Yao Xu
 # Discrimination Reporting
 # Interactive Descriptives
-# 7/18/22
+# 7/20/22
 
 library(shiny)
 # RUN FROM REPO
@@ -68,8 +68,13 @@ reporting_rts$reppct_ct_12<-reporting_rts$repvote_ct_12/reporting_rts$totalvote_
 reporting_rts$reppct_ct_16<-reporting_rts$repvote_ct_16/reporting_rts$totalvote_ct_16
 reporting_rts$reppct_diff<-reporting_rts$reppct_ct_16-reporting_rts$reppct_ct_12
 
-reporting_rts$vote12<-ifelse(reporting_rts$reppct_ct_12>0.5, "Republican","Democrat")
-reporting_rts$vote16<-ifelse(reporting_rts$reppct_ct_16>0.5, "Republican","Democrat")
+reporting_rts <- reporting_rts %>% mutate(vote12=case_when(reporting_rts$reppct_ct_12>0.5 ~ "Republican",
+                                                           reporting_rts$reppct_ct_12<=0.5 ~ "Democrat",
+                                                           is.na(reporting_rts$reppct_ct_12)~ NA_character_))
+
+reporting_rts <- reporting_rts %>% mutate(vote16=case_when(reporting_rts$reppct_ct_16>0.5 ~ "Republican",
+                                                           reporting_rts$reppct_ct_16<=0.5 ~ "Democrat",
+                                                           is.na(reporting_rts$reppct_ct_16)~ NA_character_))
 
 # 1) Between estimation
 # But to ensure we have something to compare with, we can calculate the difference in advance
@@ -571,12 +576,3 @@ x <-  function(t) 16 * sin(t)^3
 y <- function(t) 13*cos(t) - 5*cos(2*t) - 2*cos(3*t) - cos(4*t)
 dat$y <- y(dat$t)
 dat$x <- x(dat$t)
-
-reporting_rts<-reporting_rts[reporting_rts$complaint_year!=2014,]
-reporting_rts_ct<-reporting_rts %>% group_by_at(c("rep_c","mth_case_file_date_new_num"))%>% count()
-#reporting_rts_ct<-reporting_rts_ct[!str_detect(reporting_rts_ct[[input$type_rept2]],"NA"),]
-ggplot(data = reporting_rts_ct, aes(x = mth_case_file_date_new_num, y=n))+
-  geom_bar(stat="identity")+facet_wrap(~reporting_rts_ct$rep_c)
-
-
-# plotOutput(outputId = "bacorPlot", width = "100%")

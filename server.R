@@ -1,7 +1,7 @@
 # Yao Xu
 # Discrimination Reporting
 # Interactive Descriptives
-# 7/18/22
+# 7/20/22
 
 library(shiny)
 # RUN FROM REPO
@@ -68,8 +68,13 @@ reporting_rts$reppct_ct_12<-reporting_rts$repvote_ct_12/reporting_rts$totalvote_
 reporting_rts$reppct_ct_16<-reporting_rts$repvote_ct_16/reporting_rts$totalvote_ct_16
 reporting_rts$reppct_diff<-reporting_rts$reppct_ct_16-reporting_rts$reppct_ct_12
 
-reporting_rts$vote12<-ifelse(reporting_rts$reppct_ct_12>0.5, "Republican","Democrat")
-reporting_rts$vote16<-ifelse(reporting_rts$reppct_ct_16>0.5, "Republican","Democrat")
+reporting_rts <- reporting_rts %>% mutate(vote12=case_when(reporting_rts$reppct_ct_12>0.5 ~ "Republican",
+                                                           reporting_rts$reppct_ct_12<=0.5 ~ "Democrat",
+                                                           is.na(reporting_rts$reppct_ct_12)~ NA_character_))
+
+reporting_rts <- reporting_rts %>% mutate(vote16=case_when(reporting_rts$reppct_ct_16>0.5 ~ "Republican",
+                                                           reporting_rts$reppct_ct_16<=0.5 ~ "Democrat",
+                                                           is.na(reporting_rts$reppct_ct_16)~ NA_character_))
 
 # 1) Between estimation
 # But to ensure we have something to compare with, we can calculate the difference in advance
@@ -333,9 +338,8 @@ corrplot2 <- function(data,method = "pearson",sig.level = 0.05, order = "origina
   )
 }
 
-
 # SERVER  --------------
-# freqdt_repv_csd
+
 colnames(reporting_rts)
 server <- function(input, output, session) {
   output$PoliPlot <- renderPlot({
@@ -369,7 +373,7 @@ server <- function(input, output, session) {
   
   output$dt_repv <- renderDataTable({poli_table})
   output$freqdt_repv <- renderDataTable({
-    freqdt_repv_csd<-as.data.frame(table(poli_table[,input$type_rept]))
+    freqdt_repv_csd<-as.data.frame(table(poli_table[,input$type_rept], useNA = "ifany"))
     freqdt_repv_csd<-freqdt_repv_csd[order(freqdt_repv_csd$Freq,decreasing=T),]
     colnames(freqdt_repv_csd)<-c(input$type_rept,"Count")
     freqdt_repv_csd
@@ -619,4 +623,5 @@ server <- function(input, output, session) {
   })
   
 }
+
 
