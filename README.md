@@ -30,9 +30,6 @@ Answer: We included this, but in 2012 mean =0.32; sd = 0.16; In 2016, mean=0.26;
 Answer: It won't solve our problem, since the raw changes of increase (or decrease) did not show enough variation
 
 
-Note: Missingness in census tract level political variables in either 2012 or 2016 are omitted from the data.
-
-
 ### Hosting interactive descriptives for Meeting on May 23rd, 2022.
 
 Features of this application:
