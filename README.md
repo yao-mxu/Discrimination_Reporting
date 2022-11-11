@@ -42,11 +42,10 @@ Features of this application:
 ![flowchart](https://github.com/yx1441/Discrimination_Reporting/blob/fe1aee5cf619c811acd7601256f6f1ed8b22bc51/flowchart.png)
 
 ## Flowchart of DFEH Employment Cases
-
-![preview](https://github.com/yx1441/Discrimination_Reporting/dr1.png)
-![preview](https://github.com/yx1441/Discrimination_Reporting/dr2.png)
-![preview](https://github.com/yx1441/Discrimination_Reporting/dr3.png)
-![preview](https://github.com/yx1441/Discrimination_Reporting/dr4.png)
+![preview](https://github.com/yao-mxu/Discrimination_Reporting/blob/9729e80b0ea1e5cd71de6fc2c66bb4598a6a1ef8/dr1.png)
+![preview](https://github.com/yao-mxu/Discrimination_Reporting/blob/9729e80b0ea1e5cd71de6fc2c66bb4598a6a1ef8/dr2.png)
+![preview](https://github.com/yao-mxu/Discrimination_Reporting/blob/9729e80b0ea1e5cd71de6fc2c66bb4598a6a1ef8/dr3.png)
+![preview](https://github.com/yao-mxu/Discrimination_Reporting/blob/9729e80b0ea1e5cd71de6fc2c66bb4598a6a1ef8/dr4.png)
 
 
 ## How to run
